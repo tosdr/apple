@@ -1,0 +1,133 @@
+{
+  "identifier" : "2B29224E",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "6471382791",
+      "localizations" : [
+        {
+          "description" : "Eine 10€ Spende an unser Team. Vielen Dank!",
+          "displayName" : "Pizza",
+          "locale" : "de"
+        },
+        {
+          "description" : "A 10$ Donation to our Team. Thank you!",
+          "displayName" : "Pizza",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "10dollardonation",
+      "referenceName" : "10dollardonation",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "6471382790",
+      "localizations" : [
+        {
+          "description" : "Eine 1€ Spende an unser Team. Vielen Dank!",
+          "displayName" : "Wasser",
+          "locale" : "de"
+        },
+        {
+          "description" : "A 1$ Donation to our Team. Thank you!",
+          "displayName" : "Water",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "1dollardonation",
+      "referenceName" : "1dollardonation",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "6471382699",
+      "localizations" : [
+        {
+          "description" : "A 5$ Donation to our Team. Thank you!",
+          "displayName" : "Coffee",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Eine 6€ Spende an unser Team. Vielen Dank!",
+          "displayName" : "Kaffee",
+          "locale" : "de"
+        }
+      ],
+      "productID" : "5dollardonation",
+      "referenceName" : "5dollardonation",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6470998202",
+    "_developerTeamID" : "R2VD9CXX2L",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 725233302.67897904,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : {
+          "index" : 2,
+          "type" : "generic"
+        },
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
