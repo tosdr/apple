@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import SwiftyJSON
 
 // API URL: https://api.tosdr.org/service/v2/
 // Parameters:
@@ -31,20 +30,89 @@ struct ToSDR {
 }
 
 struct Point: Hashable {
+    var localizedTitle: String?
     var title: String
     var tlDr: String
     var description: String
     let quote: String
     let type: String
     let links: String
-    var translated: Bool = false
 }
 
-
+struct ServiceResponse: Codable {
+    let id: Int
+    let is_comprehensively_reviewed: Bool
+    let name: String
+    let updated_at: String
+    let created_at: String
+    let slug: String
+    let rating: String
+    let urls: [String]
+    let image: String
+    let documents: [Document]
+    let points: [Point]
+    
+    struct Document: Codable {
+        let id: Int
+        let name: String
+        let url: String
+        let updated_at: String
+        let created_at: String
+    }
+    
+    struct Point: Codable {
+        let id: Int
+        let title: String?
+        let source: String?
+        let status: String?
+        let analysis: String?
+        let case_info: Case?
+        let document_id: Int
+        let updated_at: String
+        let created_at: String
+        
+        struct Case: Codable {
+            let id: Int
+            let weight: Int
+            let title: String?
+            let localized_title: String?
+            let description: String?
+            let updated_at: String
+            let created_at: String
+            let topic_id: Int
+            let classification: String
+            
+            enum CodingKeys: String, CodingKey {
+                case id, weight, title, localized_title, description
+                case updated_at, created_at, topic_id, classification
+            }
+        }
+        
+        enum CodingKeys: String, CodingKey {
+            case id, title, source, status, analysis
+            case case_info = "case"
+            case document_id, updated_at, created_at
+        }
+    }
+}
 
 func GetServicePageById(service: Int) async -> Response {
     do {
-        let url = URL(string: "https://\(getServiceURL())/service/v2/?id=\(service)")!
+        // Get current locale and extract language code
+        let languageCode = Locale.current.language.languageCode?.identifier ?? ""
+        
+        // Base URL
+        var urlString = "https://\(getServiceURL())/service/v3/?id=\(service)"
+        
+        // Add language parameter for supported languages
+        switch languageCode {
+        case "de", "nl", "fr", "es":
+            urlString += "&lang=\(languageCode)"
+        default:
+            break
+        }
+        
+        let url = URL(string: urlString)!
         let timeoutInterval: TimeInterval = 10
         
         let configuration = URLSessionConfiguration.default
@@ -53,53 +121,55 @@ func GetServicePageById(service: Int) async -> Response {
         
         let session = URLSession(configuration: configuration)
         
-        let data = try await session.data(from: url)
-        let json = try JSON(data: data.0)
+        let (data, response) = try await session.data(from: url)
         
-        let error = json["error"].intValue
-        
-        if (error != 256) {
-            print("Error: \(error)")
-            return Response(error: true, message: json["message"].stringValue, response: nil)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            return Response(error: true, message: "Invalid response type", response: nil)
         }
         
-        let response = json["parameters"]
-        
-        let name = response["name"].stringValue
-        let id = response["id"].intValue
-        let icon = response["image"].stringValue
-        var grade = response["rating"].stringValue
-        let reviewed = response["is_comprehensively_reviewed"].boolValue
-        let urls = response["urls"].arrayValue.map { $0.stringValue }
-        
-        if (grade == "") {
-            grade = "N/A"
+        guard httpResponse.statusCode == 200 else {
+            return Response(error: true, message: "HTTP Error: \(httpResponse.statusCode)", response: nil)
         }
         
+        let serviceResponse = try JSONDecoder().decode(ServiceResponse.self, from: data)
         
+        // Convert API points to our Point model
         var points: [Point] = []
-        for point in response["points"].arrayValue {
-            if (point["status"] != "approved") {
-                continue
-            }
-            var title = point["case"]["title"].stringValue
-            if (title == "" || title == "none") {
-                title = point["title"].stringValue
-            }
-            let tlDr = point["analysis"].stringValue
-            let description = point["case"]["description"].stringValue
-            let quote = point["source"].stringValue
-            let type = point["case"]["classification"].stringValue
-            let links = point["id"].stringValue
+        for point in serviceResponse.points {
+            guard let status = point.status, status == "approved" else { continue }
             
-            points.append(Point(title: title, tlDr: tlDr, description: description, quote: quote, type: type, links: links))
+            let title = point.case_info?.title.flatMap { $0.isEmpty || $0 == "none" ? nil : $0 }
+                ?? point.title
+                ?? "Unknown Title"
+                
+            points.append(Point(
+                localizedTitle: point.case_info?.localized_title,
+                title: title,
+                tlDr: point.analysis ?? "",
+                description: point.case_info?.description ?? "",
+                quote: point.source ?? "",
+                type: point.case_info?.classification ?? "unknown",
+                links: String(point.id)
+            ))
         }
         
-        let dict = Dictionary<String, [Point]>(grouping: points, by: {$0.type})
+        let dict = Dictionary(grouping: points, by: { $0.type })
         
-        let tosdr = ToSDR(name: name, id: id, icon: icon, grade: grade, points: dict, reviewed: reviewed, urls: urls)
+        let tosdr = ToSDR(
+            name: serviceResponse.name,
+            id: serviceResponse.id,
+            icon: serviceResponse.image,
+            grade: serviceResponse.rating,
+            points: dict,
+            reviewed: serviceResponse.is_comprehensively_reviewed,
+            urls: serviceResponse.urls
+        )
         
         return Response(error: false, message: nil, response: tosdr)
+        
+    } catch let decodingError as DecodingError {
+        print("Decoding error: \(decodingError)")
+        return Response(error: true, message: "Failed to parse response: \(decodingError.localizedDescription)", response: nil)
     } catch {
         return Response(error: true, message: error.localizedDescription, response: nil)
     }

@@ -12,49 +12,49 @@ struct DonateView: View {
     
     var body: some View {
         List {
-            Section("Why Donate?") {
+            Section(String(localized: "donate_section_why")) {
                 HStack {
                     Image(systemName: "dollarsign").frame(width: 32, height: 32)
                     VStack(alignment: .leading) {
-                        Text("Hello!").font(.title3)
-                        Text("If you like this app, please consider donating to the ToS;DR project. Feel free to scroll down to see why and for what the money will be used for ☺️")
+                        Text(String(localized: "donate_hello_title")).font(.title3)
+                        Text(String(localized: "donate_hello_desc"))
                     }
                 }
                 HStack {
                     Image(systemName: "server.rack").frame(width: 32, height: 32)
                     VStack(alignment: .leading) {
-                        Text("Server Cost").font(.title3)
-                        Text("ToS;DR's Servers are quite costly and our Team members subsidize them with their own income!")
+                        Text(String(localized: "donate_server_title")).font(.title3)
+                        Text(String(localized: "donate_server_desc"))
                     }
                 }
                 HStack {
                     Image(systemName: "key").frame(width: 32, height: 32)
                     VStack(alignment: .leading) {
-                        Text("Licenses").font(.title3)
-                        Text("ToS;DR has some Licenses to uphold, like for publishing on App Stores, programming tools and more!")
+                        Text(String(localized: "donate_licenses_title")).font(.title3)
+                        Text(String(localized: "donate_licenses_desc"))
                     }
                 }
                 HStack {
                     Image(systemName: "cup.and.saucer").frame(width: 32, height: 32)
                     VStack(alignment: .leading) {
-                        Text("Personal Cost").font(.title3)
-                        Text("ToS;DR Team Members and contributers do not get paid for their work generally. We still like to get Pizza and Coffee for our hard work we put in to achieve our goals!")
+                        Text(String(localized: "donate_personal_title")).font(.title3)
+                        Text(String(localized: "donate_personal_desc"))
                     }
                 }
             }
             
-            Section("Donate") {
+            Section(String(localized: "donate_section_donate")) {
                 if (store.products.isEmpty) {
-                    Text("We are having trouble reaching the App store :(")
+                    Text(String(localized: "donate_error_appstore"))
                 }
-                ForEach(store.products) {
-                  product in
+                ForEach(store.products) { product in
                     HStack {
                         VStack(alignment: .leading) {
                             Text(product.displayName)
                             Text(product.description)
                                 .font(.caption)
-                            .foregroundColor(.secondary)}
+                                .foregroundColor(.secondary)
+                        }
                         Spacer()
                         Button(product.displayPrice) {
                             Task {
@@ -63,11 +63,10 @@ struct DonateView: View {
                         }.buttonStyle(.borderedProminent)
                     }
                 }
-
             }
         }
         .listRowSeparator(.hidden)
-        .navigationTitle("Donate")
+        .navigationTitle(String(localized: "label_donate"))
     }
 }
 

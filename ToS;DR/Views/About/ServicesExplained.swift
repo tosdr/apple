@@ -10,21 +10,21 @@ import SwiftUI
 struct ServicesExplained: View {
     var body: some View {
         List {
-            Section("Service Badges") {
+            Section(String(localized: "services_section_badges")) {
                 HStack() {
                     VStack(alignment: .leading) {
-                        Label("Review Status", systemImage: "checkmark.seal").font(.title2)
-                        Text("In ToS;DR clasically reffered to as 'Comprehensively Reviewed', meaning this service has enough curated points to be deemed accurate enough for an everyday rating.").font(.caption)
+                        Label(String(localized: "services_review_status"), systemImage: "checkmark.seal").font(.title2)
+                        Text(String(localized: "services_review_status_desc")).font(.caption)
                     }
                 }
                 .contentShape(Rectangle())
                 .listRowBackground(Color.green)
-                    .foregroundStyle(Color.white)
+                .foregroundStyle(Color.white)
             }
-            Section("Service Contents") {
-                Text("Each Service includes Points that determine a final Grade, Links to all policies that are relevant to ToS;DR and other useful information.")
+            Section(String(localized: "services_section_contents")) {
+                Text(String(localized: "services_contents_desc"))
             }
-        }.navigationTitle("Services")
+        }.navigationTitle(String(localized: "services_title"))
     }
 }
 

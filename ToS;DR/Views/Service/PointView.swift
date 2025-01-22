@@ -41,11 +41,11 @@ struct PointView: View {
     
     var body: some View {
         List {
-            Section("Point Details") {
+            Section(String(localized: "point_section_details")) {
                 getType(point: pointSelected)
             }
             if (pointSelected.description != "") {
-                Section("Description") {
+                Section(String(localized: "point_section_description")) {
                     Text(pointSelected.description)
                         .contextMenu(menuItems: {
                             Button {
@@ -56,13 +56,13 @@ struct PointView: View {
                                 NSPasteboard.general.setString(pointSelected.description, forType: NSPasteboard.PasteboardType.string)
                                 #endif
                             } label: {
-                                Label("Copy to Clipboard", systemImage: "doc.on.doc")
+                                Label(String(localized: "point_copy_to_clipboard"), systemImage: "doc.on.doc")
                             }
                         })
                 }
             }
             if (pointSelected.quote != "") {
-                Section("Quoted From") {
+                Section(String(localized: "point_section_quote")) {
                     Button(pointSelected.quote) {
                         if pointSelected.quote.starts(with: "https://") {
                             openURL(URL(string: pointSelected.quote)!)
@@ -71,7 +71,7 @@ struct PointView: View {
                 }
             }
             if (pointSelected.tlDr != "" && pointSelected.tlDr != "Generated through the annotate view") {
-                Section("TL;DR") {
+                Section(String(localized: "point_section_tldr")) {
                     Text(pointSelected.tlDr)
                 }
             }
@@ -79,14 +79,14 @@ struct PointView: View {
                 Button {
                     openURL(URL(string: "https://edit.tosdr.org/points/\(String(pointSelected.links))")!)
                 } label: {
-                    Label("Open on ToS;DR", systemImage: "globe")
+                    Label(String(localized: "point_open_on_tosdr"), systemImage: "globe")
                 }
                 .contentShape(Rectangle())
 #if os(macOS)
                 .buttonStyle(.plain)
 #endif
             }
-        }.navigationTitle("Viewing Point Details")
+        }.navigationTitle(String(localized: "point_viewing_details"))
     }
 }
 

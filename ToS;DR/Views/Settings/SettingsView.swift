@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     let defaults = UserDefaults.standard
     @State private var refresh: Bool = false
+    @Environment(\.modelContext) private var modelContext
     
     var servers = ["api.tosdr.org", "api.staging.tosdr.org", "Custom"]
     
@@ -23,7 +24,7 @@ struct SettingsView: View {
     
     var body: some View {
         List {
-            Section("App Settings") {
+            Section(String(localized: "settings_section_app")) {
 #if os(iOS)
                 NavigationLink(destination: AppIconSetting()) {
                     Label("App Icon", systemImage: "app.dashed")
@@ -31,48 +32,43 @@ struct SettingsView: View {
 #endif
                 // local/server search setting
                 Toggle(isOn: $serverSearch) {
-                    VStack(alignment: .leading) {
-                        Label("Prefer Server-Side Search", systemImage: "magnifyingglass")
-                        Text("Instead of searching using the local database, it will use the online search. Will show unverified Services as well.").font(.caption).foregroundColor(.secondary)
-                    }
+                    Label(title: {
+                        VStack(alignment: .leading) {
+                            Text(String(localized: "settings_server_search_title"))
+                            Text(String(localized: "settings_server_search_desc")).font(.caption).foregroundColor(.secondary)
+                            
+                        }}, icon: { Image(systemName: "square.and.arrow.up") }
+                    )
                 }.toggleStyle(.switch)
             }
-            Section("Database") {
+            Section(String(localized: "settings_section_database")) {
                 if (getDBCount() == nil) {
                     VStack(alignment: .leading) {
-                        Label("Database not pulled yet", systemImage: "questionmark.folder")
-                        Text("The database has not been pulled from the server yet. Please pull the database first.").font(.caption).foregroundColor(.secondary)
+                        Label(String(localized: "settings_db_not_pulled"), systemImage: "questionmark.folder")
+                        Text(String(localized: "settings_db_not_pulled_desc")).font(.caption).foregroundColor(.secondary)
                     }
                 } else {
                     HStack {
                         VStack(alignment: .leading) {
-                            Label("Database Date", systemImage: "calendar.badge.clock")
-                            Text("The date where the Database was last pulled from the server.").font(.caption).foregroundColor(.secondary)
+                            Label(String(localized: "settings_db_date"), systemImage: "calendar.badge.clock")
+                            Text(String(localized: "settings_db_date_desc")).font(.caption).foregroundColor(.secondary)
                         }
                         Spacer()
                         Text(defaults.string(forKey: "lastPull") ?? "None").foregroundColor(.secondary)
                     }
                     HStack {
                         VStack(alignment: .leading) {
-                            Label("Services Indexed", systemImage: "globe")
-                            Text("The number of services that are indexed in the database and available offline.").font(.caption).foregroundColor(.secondary)
+                            Label(String(localized: "settings_db_services"), systemImage: "globe")
+                            Text(String(localized: "settings_db_services_desc")).font(.caption).foregroundColor(.secondary)
                         }
                         Spacer()
                         Text(String(getDBCount() ?? 0)).foregroundColor(.secondary)
-                    }
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Label("Database Size", systemImage: "externaldrive")
-                            Text("The size of the database saved on your device.").font(.caption).foregroundColor(.secondary)
-                        }
-                        Spacer()
-                        Text(getDBSize() ?? "None").foregroundColor(.secondary)
                     }
                 }
                 Button {
                     Task {
                         isLoading = true
-                        if (await updateDB().value) {
+                        if (await updateDB(context: modelContext).value) {
                             refresh.toggle()
                             isLoading = false
                         } else {
@@ -83,27 +79,31 @@ struct SettingsView: View {
                 } label: {
                     if (isLoading) {
                         HStack {
-                            Label("Refreshing Database", systemImage: "arrow.clockwise")
+                            Label(String(localized: "settings_db_refreshing"), systemImage: "arrow.clockwise")
                             Spacer()
                             ProgressView()
                         }
                     } else {
-                        Label("Refresh Database now", systemImage: "arrow.down.doc")
+                        Label(String(localized: "settings_db_refresh"), systemImage: "arrow.down.doc")
                     }
                 }
                 .contentShape(Rectangle())
                 .alert(isPresented: $isShown) {
-                    Alert(title: Text("Error"), message: Text("Could not update Database. Please try again later."), dismissButton: .default(Text("OK")))
+                    Alert(
+                        title: Text(String(localized: "settings_error_title")),
+                        message: Text(String(localized: "settings_error_db_update")),
+                        dismissButton: .default(Text("OK"))
+                    )
                 }
 #if os(macOS)
                 .buttonStyle(.plain)
 #endif
                 Button {
-                    if (deleteDB()) {
+                    if (deleteDB(context: modelContext)) {
                         refresh.toggle()
                     }
                 } label: {
-                    Label("Delete local Database", systemImage: "minus.circle")
+                    Label(String(localized: "settings_db_delete"), systemImage: "minus.circle")
                 }.foregroundStyle(.red)
                     .contentShape(Rectangle())
                 
@@ -112,9 +112,8 @@ struct SettingsView: View {
 #endif
             }
             .id(refresh)
-            Section("API Options") {
-                // Selection of stable, staging and custom server which is editable
-                Picker("Server", selection: $serverSelected) {
+            Section(String(localized: "settings_section_api")) {
+                Picker(String(localized: "settings_api_server"), selection: $serverSelected) {
                     ForEach(servers, id: \.self) { server in
                         Text(server)
                     }
@@ -122,32 +121,32 @@ struct SettingsView: View {
                 
                 if (serverSelected == "Custom") {
                     HStack {
-                        Text("Custom Server")
+                        Text(String(localized: "settings_api_custom"))
                         TextField("api.tosdr.org", text: $customServer)
                             .textFieldStyle(.roundedBorder)
                             .disableAutocorrection(true)
-                            .onChange(of: customServer) { value in
+                            .onChange(of: customServer, initial: false) { _, value in
                                 defaults.setValue(value, forKey: "serverUrl")
                             }
                     }
                 }
                 
-            }.onChange(of: serverSelected) { value in
+            }.onChange(of: serverSelected, initial: false) { _, value in
                 customServer = ""
                 defaults.setValue(value, forKey: "server")
                 defaults.removeObject(forKey: "serverUrl")
             }
             #if os(iOS)
-            Section("Reset") {
+            Section(String(localized: "settings_section_reset")) {
                 Button {
                     defaults.setValue(true, forKey: "firstStart")
                 } label: {
-                    Label("Reset Onboarding State", systemImage: "restart.circle")
+                    Label(String(localized: "settings_reset_onboarding"), systemImage: "restart.circle")
                 }
                     .contentShape(Rectangle())
             }
             #endif
-        }.navigationTitle("Settings")
+        }.navigationTitle(String(localized: "label_settings"))
     }
 }
 

@@ -1,4 +1,14 @@
 {
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
   "identifier" : "2B29224E",
   "nonRenewingSubscriptions" : [
 
@@ -69,7 +79,7 @@
     "_applicationInternalID" : "6470998202",
     "_developerTeamID" : "R2VD9CXX2L",
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 725233302.67897904,
+    "_lastSynchronizedDate" : 759263786.33827198,
     "_locale" : "en_US",
     "_storefront" : "USA",
     "_storeKitErrors" : [
@@ -127,7 +137,7 @@
 
   ],
   "version" : {
-    "major" : 3,
+    "major" : 4,
     "minor" : 0
   }
 }

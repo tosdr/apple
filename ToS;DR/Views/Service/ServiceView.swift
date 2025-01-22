@@ -15,6 +15,8 @@ struct ServiceView: View {
     
     @State var serviceInfo: ToSDR?
     
+    @State private var showLocalizedTitles = true
+    
     @State private var showAlertError = false
     
     @State private var error = ""
@@ -28,11 +30,26 @@ struct ServiceView: View {
         }
     }
     
+    // Check if any points have localized titles
+    func hasLocalizedTitles() -> Bool {
+        guard serviceInfo != nil else {
+            return false
+        }
+        for points in serviceInfo!.points.values {
+            for point in points {
+                if point.localizedTitle != nil {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
     var grade = ""
     
     var body: some View {
         if (searchResult == nil) {
-            Text("No service has been selected!")
+            Text(String(localized: "service_no_selection"))
         } else if (serviceInfo == nil) {
             if (!errorAcknowledge) {
                 ProgressView().frame(minWidth: 100, minHeight: 100).task(id: serviceInfo?.id) {
@@ -48,12 +65,16 @@ struct ServiceView: View {
                     }
                 }
                 .alert(isPresented: $showAlertError, content: {
-                    Alert(title: Text("Error!"), message: Text("The API has not completed successfully. Please E-Mail Justin Back immedietly.\nError: \(error)"), dismissButton: .default(
-                        Text("OK"),
-                        action: {
-                            errorAcknowledge.toggle()
-                        }
-                    ))
+                    Alert(
+                        title: Text(String(localized: "service_error_title")),
+                        message: Text(String(format: String(localized: "service_error_api"), error)),
+                        dismissButton: .default(
+                            Text(String(localized: "ok")),
+                            action: {
+                                errorAcknowledge.toggle()
+                            }
+                        )
+                    )
                 })
             } else {
                 GeometryReader { geometry in
@@ -62,14 +83,14 @@ struct ServiceView: View {
                             Image(systemName: "pc")
                                 .font(.system(size: 150))
                                 .padding([.bottom], 12.0)
-                            Text("Error!")
+                            Text(String(localized: "service_error_title"))
 #if os(macOS)
-                            Button("Retry") {
+                            Button(String(localized: "service_error_retry")) {
                                 errorAcknowledge.toggle()
                                 error = ""
                             }
 #else
-                            Text("Please pull down to retry.")
+                            Text(String(localized: "service_error_pull"))
 #endif
                         }
                         .padding()
@@ -88,7 +109,24 @@ struct ServiceView: View {
                     ServiceHeader(serviceInfo: serviceInfo!)
                 }.listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets())
-                ServicePoints(serviceInfo: serviceInfo!, clickable: true)
+                ServicePoints(serviceInfo: serviceInfo!, clickable: true, showLocalizedTitles: $showLocalizedTitles)
+                
+                if hasLocalizedTitles() {
+                    Section(String(localized: "service_localization")) {
+                        Label {
+                            VStack(alignment: .leading) {
+                                Text(String(localized: "service_localization_warning"))
+                                Text(String(localized: "service_localization_warning_desc"))
+                                    .font(.caption).foregroundColor(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "exclamationmark.octagon.fill")
+                                .foregroundStyle(.red)
+                        }
+                        Toggle(String(localized: "service_localization_toggle"), isOn: $showLocalizedTitles)
+                    }
+                    
+                }
             }
         }
     }

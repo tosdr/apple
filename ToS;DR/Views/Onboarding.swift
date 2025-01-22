@@ -17,23 +17,49 @@ struct OnboardingView: View {
             #endif
         } else {
             TabView(selection: $selectedPage) {
-                OnboardingPageView(imageName: "DarkIcon-Preview", title: String(localized: "Welcome to ToS;DR"), description: String(localized: "You can explore ratings of services by searching them in this app!"), systemImage: false, buttonText: String(localized: "Next"), buttonAction: {
-                    if (selectedPage == 0) {
-                        withAnimation { selectedPage += 1 }
+                OnboardingPageView(
+                    imageName: "DarkIcon-Preview",
+                    title: String(localized: "onboarding_welcome_title"),
+                    description: String(localized: "onboarding_welcome_desc"),
+                    systemImage: false,
+                    buttonText: String(localized: "onboarding_button_next"),
+                    buttonAction: {
+                        if (selectedPage == 0) {
+                            withAnimation { selectedPage += 1 }
+                        }
                     }
-                }).tag(0)
-                OnboardingPageView(imageName: "safari", title: String(localized: "Safari Extension"), description: String(localized: "Enable the Safari extension to see ratings of services you visit on the fly, as you browse the web."), systemImage: true, buttonText: String(localized: "Next"), buttonAction: {
-                    if (selectedPage == 1) {
-                        withAnimation { selectedPage += 1 }
-                    }
-                }, secondButtonText: String(localized: "Enable Extension"), secondButtonAction: {
-                    openURL(URL(string: "App-Prefs:Safari&path=WEB_EXTENSIONS")!)
-
-                }, notice: String(localized: "We cannot see the websites you visit. Your privacy is important to us.")).tag(1)
-                OnboardingPageView(imageName: "party.popper", title: String(localized: "Let's get going!"), description: String(localized: "Have fun and let's get started! Feel free to donate to our cause to help future development!"), systemImage: true, buttonText: String(localized: "Get Started"), buttonAction: {
-                    defaults.setValue(false, forKey: "firstStart")
-                    done = true
-                }, buttonColor: Color.purple).tag(2)
+                ).tag(0)
+                
+                OnboardingPageView(
+                    imageName: "safari",
+                    title: String(localized: "onboarding_safari_title"),
+                    description: String(localized: "onboarding_safari_desc"),
+                    systemImage: true,
+                    buttonText: String(localized: "onboarding_button_next"),
+                    buttonAction: {
+                        if (selectedPage == 1) {
+                            withAnimation { selectedPage += 1 }
+                        }
+                    },
+                    secondButtonText: String(localized: "onboarding_button_enable"),
+                    secondButtonAction: {
+                        openURL(URL(string: "App-Prefs:Safari&path=WEB_EXTENSIONS")!)
+                    },
+                    notice: String(localized: "onboarding_safari_notice")
+                ).tag(1)
+                
+                OnboardingPageView(
+                    imageName: "party.popper",
+                    title: String(localized: "onboarding_final_title"),
+                    description: String(localized: "onboarding_final_desc"),
+                    systemImage: true,
+                    buttonText: String(localized: "onboarding_button_start"),
+                    buttonAction: {
+                        defaults.setValue(false, forKey: "firstStart")
+                        done = true
+                    },
+                    buttonColor: Color.purple
+                ).tag(2)
             }
             #if os(iOS)
             .tabViewStyle(.page(indexDisplayMode: .never))

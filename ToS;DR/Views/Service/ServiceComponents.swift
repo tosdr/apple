@@ -35,7 +35,7 @@ struct ServiceHeader: View {
                 Spacer()
             }
             if (serviceInfo.reviewed) {
-                Label("Reviewed", systemImage: "checkmark.seal")
+                Label(String(localized: "service_badge_reviewed"), systemImage: "checkmark.seal")
                     .padding(5)
                     .padding([.trailing], 6)
                     .foregroundColor(.white)
@@ -45,23 +45,27 @@ struct ServiceHeader: View {
                         showAlert.toggle()
                     }
                     .alert(isPresented: $showAlert, content: {
-                        Alert(title: Text("Review Status"), message: Text("In ToS;DR clasically reffered to as 'Comprehensively Reviewed', meaning this service has enough curated points to be deemed accurate enough for an everyday rating."), dismissButton: .default(Text("OK")))
+                        Alert(
+                            title: Text(String(localized: "service_review_title")), 
+                            message: Text(String(localized: "service_review_message")), 
+                            dismissButton: .default(Text(String(localized: "ok")))
+                        )
                     })
             }
-            Label("Grade: \(String(serviceInfo.grade))", systemImage: "shield")
+            Label(String(format: String(localized: "service_badge_grade"), String(serviceInfo.grade)), systemImage: "shield")
                 .padding(5)
                 .padding([.trailing], 6)
                 .foregroundColor(.white)
                 .background(getColorForRating(rating: serviceInfo.grade))
                 .cornerRadius(20)
             
-            Label("Points: \(String(serviceInfo.points.totalCount()))", systemImage: "exclamationmark.triangle.fill")
+            Label(String(format: String(localized: "service_badge_points"), String(serviceInfo.points.totalCount())), systemImage: "exclamationmark.triangle.fill")
                 .padding(5)
                 .padding([.trailing], 6)
                 .foregroundColor(.white)
                 .background(Color.blue)
                 .cornerRadius(20)
-            Label("Open on ToS;DR", systemImage: "globe")
+            Label(String(localized: "service_badge_open"), systemImage: "globe")
                 .padding(5)
                 .padding([.trailing], 6)
                 .foregroundColor(.white)
@@ -138,10 +142,12 @@ struct ServicePoints: View {
     
     var serviceInfo: ToSDR
     var clickablePoints: Bool
-
-    init(serviceInfo: ToSDR, clickable: Bool) {
+    @Binding var showLocalizedTitles: Bool
+    
+    init(serviceInfo: ToSDR, clickable: Bool, showLocalizedTitles: Binding<Bool>) {
         self.serviceInfo = serviceInfo
         self.clickablePoints = clickable
+        self._showLocalizedTitles = showLocalizedTitles
     }
     
     func getCase(point: Point) -> some View {
@@ -164,12 +170,11 @@ struct ServicePoints: View {
             Image(systemName: icon)
                 .frame(width:24, height:24)
                 .foregroundColor(color)
-            Text(point.title)
+            Text(showLocalizedTitles && point.localizedTitle != nil ? point.localizedTitle! : point.title)
 #if os(macOS)
                 .font(.title2)
 #endif
         }
-        //return icon
     }
     
     func getCaseClickable(point: Point) -> some View {
@@ -180,11 +185,10 @@ struct ServicePoints: View {
         }
     }
     
-    
     var body: some View {
-        Section(header: Text("Points for \(serviceInfo.name)")) {
+        Section(header: Text(String(format: String(localized: "points_section_for"), serviceInfo.name))) {
             if (serviceInfo.points.keys.contains("blocker")) {
-                Section(header: Text("Blocker")) {
+                Section(header: Text(String(localized: "points_type_blocker"))) {
                     ForEach(0...(serviceInfo.points["blocker"]?.count ?? 0)-1, id: \.self) {
                         if clickablePoints {
                             getCaseClickable(point: serviceInfo.points["blocker"]![$0])
@@ -195,36 +199,41 @@ struct ServicePoints: View {
                 }
             }
             if (serviceInfo.points.keys.contains("bad")) {
-                Section(header: Text("Bad")) {
+                Section(header: Text(String(localized: "points_type_bad"))) {
                     ForEach(0...(serviceInfo.points["bad"]?.count ?? 0)-1, id: \.self) {
                         if clickablePoints {
                             getCaseClickable(point: serviceInfo.points["bad"]![$0])
                         } else {
                             getCase(point: serviceInfo.points["bad"]![$0])
-                        }                    }
+                        }
+                    }
                 }
             }
             if (serviceInfo.points.keys.contains("good")) {
-                Section(header: Text("Good")) {
+                Section(header: Text(String(localized: "points_type_good"))) {
                     ForEach(0...(serviceInfo.points["good"]?.count ?? 0)-1, id: \.self) {
                         if clickablePoints {
                             getCaseClickable(point: serviceInfo.points["good"]![$0])
                         } else {
                             getCase(point: serviceInfo.points["good"]![$0])
-                        }                    }
+                        }
+                    }
                 }
             }
             if (serviceInfo.points.keys.contains("neutral")) {
-                Section(header: Text("Neutral")) {
+                Section(header: Text(String(localized: "points_type_neutral"))) {
                     ForEach(0...(serviceInfo.points["neutral"]?.count ?? 0)-1, id: \.self) {
                         if clickablePoints {
                             getCaseClickable(point: serviceInfo.points["neutral"]![$0])
                         } else {
                             getCase(point: serviceInfo.points["neutral"]![$0])
-                        }                    }
+                        }
+                    }
                 }
             }
         }
+        
+        
     }
 }
 

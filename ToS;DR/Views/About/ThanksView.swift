@@ -12,22 +12,20 @@ struct ThanksView: View {
 
     var body: some View {
         List {
-            Label("Thank you!", systemImage: "heart.fill").font(.title3)
-            Text("Thanks to these things this app came to be!")
+            Label(String(localized: "thanks_header"), systemImage: "heart.fill").font(.title3)
+            Text(String(localized: "thanks_desc"))
             
-            Section("ToS;DR Team") {
-                Text("Thanks to the ToS;DR Team for being filled with so much kindness and empathy throughout the development of the app while I was facing personal dilemmas.")
+            Section(String(localized: "thanks_section_team")) {
+                Text(String(localized: "thanks_team_desc"))
             }
             
-            Section("Open Source Libraries") {
-                fossButton(url: "https://github.com/stephencelis/SQLite.swift", name: "SQLite.swift")
+            Section(String(localized: "thanks_section_libraries")) {
                 fossButton(url: "https://github.com/lorenzofiamingo/swiftui-cached-async-image", name: "swiftui-cached-async-image")
-                fossButton(url: "https://github.com/SwiftyJSON/SwiftyJSON", name: "SwiftyJSON")
-                fossButton(url: "https://github.com/weichsel/ZIPFoundation", name: "ZIPFoundation")
+                fossButton(url: "https://github.com/Cindori/FluidGradient", name: "FluidGradient")
             }
             
-            Text("...and of course you!")
-        }.navigationTitle("Thanks")
+            Text(String(localized: "thanks_and_you"))
+        }.navigationTitle(String(localized: "thanks_title"))
     }
     
     func fossButton(url: String, name: String) -> some View {

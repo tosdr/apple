@@ -8,56 +8,25 @@
 import SwiftUI
 import OSLog
 import CachedAsyncImage
+import SwiftData
 
 struct ContentView: View {
     @State private var searchText = ""
     @State private var searchResult: SearchResult?
     @State var searchTask: Task<(), Error>?
     @Environment(\.openURL) var openURL
+    @Environment(\.modelContext) private var modelContext
     
     let logger = Logger()
     
-    let featured = getFeaturedServices()
+//    let featured = getFeaturedServices()
     
     var body: some View {
         NavigationView {
             VStack {
                 if (searchResults.isEmpty && (UserDefaults.standard.bool(forKey: "server-search") || searchText == "")) {
                     List {
-#if os(macOS)
-                        if (!featured.isEmpty) {
-                            Section("Featured") {
-                                ForEach(featured, id: \.self) { feature in
-                                    NavigationLink {
-#if os(macOS)
-                                        NavigationStack {
-                                            ServiceView(searchResult: feature)
-                                        }
-#else
-                                        ServiceView(searchResult: featured).navigationTitle(featured.name)
-#endif
-                                    } label: {
-                                        Label {
-                                            Text(feature.name)
-                                        } icon: {
-                                            CachedAsyncImage(
-                                                url: URL(string: feature.icon),
-                                                content: { image in
-                                                    image.resizable()
-                                                        .aspectRatio(contentMode: .fit)
-                                                },
-                                                placeholder: {
-                                                    Image(systemName: "display")
-                                                }
-                                            )
-                                        }
-                                    }
-                                    
-                                }
-                            }
-                        }
-#endif
-                        Section("About") {
+                        Section(String(localized: "about_section")) {
                             NavigationLink {
 #if os(macOS)
                                 NavigationStack {
@@ -67,33 +36,22 @@ struct ContentView: View {
                                 AboutView()
 #endif
                             } label: {
-                                Label("About", systemImage: "person")
+                                Label(String(localized: "label_about"), systemImage: "person")
                             }
-                            /*Button {
-                                openURL(URL(string: "https://tosdr.org/en/about")!)
+                            NavigationLink {
+                                TeamView()
                             } label: {
-                                Label {
-                                    Text("Team")
-                                    Spacer()
-                                    Image(systemName: "globe")
-                                        .foregroundStyle(.secondary)
-                                } icon: {
-                                    Image(systemName: "person.2")
-                                }
+                                Label(String(localized: "label_team"), systemImage: "person.2")
                             }
-#if os(macOS)
-                            .buttonStyle(.plain)
-#endif
-                            .contentShape(Rectangle())*/
                             NavigationLink {
                                 SettingsView()
                             } label: {
-                                Label("Settings", systemImage: "gear")
+                                Label(String(localized: "label_settings"), systemImage: "gear")
                             }
                             NavigationLink {
                                 DonateView()
                             } label: {
-                                Label("Donate", systemImage: "dollarsign")
+                                Label(String(localized: "label_donate"), systemImage: "dollarsign")
                             }
                         }
                     }
@@ -103,7 +61,7 @@ struct ContentView: View {
 #endif
                     .refreshable {
                         logger.info("Refreshing local database")
-                        if (await updateDB().value) {
+                        if (await updateDB(context: modelContext).value) {
                             logger.info("Refreshed local database")
                         } else {
                             logger.error("Failed to refresh local database")
@@ -137,14 +95,14 @@ struct ContentView: View {
                             }
                         }
                     }
-                    .navigationTitle("Search")
+                    .navigationTitle(String(localized: "search_title"))
                     .listStyle(.sidebar)
                 }
             }
 #if os(iOS)
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search ToS;DR")
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: String(localized: "search_prompt"))
 #elseif os(macOS)
-            .searchable(text: $searchText, placement: .toolbar, prompt: "Search ToS;DR")
+            .searchable(text: $searchText, placement: .toolbar, prompt: String(localized: "search_prompt"))
 #endif
             
 #if os(macOS)
@@ -165,7 +123,7 @@ struct ContentView: View {
             
 #endif
         }
-        .onChange(of: searchText) {query in
+        .onChange(of: searchText, initial: false) { _, query in
             if (UserDefaults.standard.bool(forKey: "server-search")) {
                 checkClear()
             } else {
@@ -195,7 +153,7 @@ struct ContentView: View {
         }
     }
     
-    
+    @MainActor
     func search() async -> [SearchResult]? {
         logger.debug("Searching for \(searchText)")
         if searchText.isEmpty {
@@ -208,7 +166,7 @@ struct ContentView: View {
                 }
                 return nil
             }
-            let result = await SearchInDB(name: searchText)
+            let result = await SearchInDB(name: searchText, context: modelContext)
             if !result.error {
                 return result.response
             }

@@ -6,9 +6,25 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct ToS_DRApp: App {
+    let container: ModelContainer
+    
+    init() {
+        do {
+            let schema = Schema([
+                ServiceModel.self,
+            ])
+            let modelConfiguration = ModelConfiguration(schema: schema)
+            container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+        } catch {
+            fatalError("Failed to initialize ModelContainer: \(error)")
+        }
+        unlockBetaIconIfTesting()
+        updateDBIfOld()
+    }
     
     func unlockBetaIconIfTesting() {
         let isTestFlight = Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
@@ -20,7 +36,6 @@ struct ToS_DRApp: App {
     
     func updateDBIfOld() {
         let lastUpdate = UserDefaults.standard.string(forKey: "lastPull")
-        // parse YYYY-MM-DD to Int
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let lastUpdateDate = dateFormatter.date(from: lastUpdate ?? "1970-01-01")
@@ -30,7 +45,7 @@ struct ToS_DRApp: App {
         if (now - lastUpdateInt > 604800) {
             print("Updating DB")
             Task {
-                await updateDB()
+                _ = await updateDB(context: ModelContext(container))
             }
         }
     }
@@ -62,5 +77,6 @@ struct ToS_DRApp: App {
             }
             #endif
         }
+        .modelContainer(container)
     }
 }

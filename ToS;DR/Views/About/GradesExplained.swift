@@ -10,75 +10,75 @@ import SwiftUI
 struct GradesExplained: View {
     var body: some View {
         List {
-            Section("Grades") {
+            Section(String(localized: "grades_title")) {
                 HStack() {
                     Text("A").font(.title2).padding([.trailing], 10)
                     VStack(alignment: .leading) {
-                        Text("Excellent")
-                        Text("Our best grade: This service respects your privacy.").font(.caption)
+                        Text(String(localized: "grades_a"))
+                        Text(String(localized: "grades_a_desc")).font(.caption)
                     }
                 }
                 .contentShape(Rectangle())
                 .listRowBackground(getColorForRating(rating: "A"))
-                    .foregroundStyle(Color.white)
+                .foregroundStyle(Color.white)
                 
                 HStack() {
                     Text("B").font(.title2).padding([.trailing], 10)
                     VStack(alignment: .leading) {
-                        Text("Good")
-                        Text("A pretty good grade: This service are fair for the user and could use minor adjustments.").font(.caption)
+                        Text(String(localized: "grades_b"))
+                        Text(String(localized: "grades_b_desc")).font(.caption)
                     }
                 }
                 .contentShape(Rectangle())
                 .listRowBackground(getColorForRating(rating: "B"))
-                    .foregroundStyle(Color.white)
+                .foregroundStyle(Color.white)
                 
                 HStack() {
                     Text("C").font(.title2).padding([.trailing], 10)
                     VStack(alignment: .leading) {
-                        Text("Okay")
-                        Text("This service is okay. The terms are okay, but some issues need your consideration.").font(.caption)
+                        Text(String(localized: "grades_c"))
+                        Text(String(localized: "grades_c_desc")).font(.caption)
                     }
                 }
                 .contentShape(Rectangle())
                 .listRowBackground(getColorForRating(rating: "C"))
-                    .foregroundStyle(Color.white)
+                .foregroundStyle(Color.white)
                 
                 HStack() {
                     Text("D").font(.title2).padding([.trailing], 10)
                     VStack(alignment: .leading) {
-                        Text("Bad")
-                        Text("This service's terms are uneven or there are some issues that need your attention.").font(.caption)
+                        Text(String(localized: "grades_d"))
+                        Text(String(localized: "grades_d_desc")).font(.caption)
                     }
                 }
                 .contentShape(Rectangle())
                 .listRowBackground(getColorForRating(rating: "D"))
-                    .foregroundStyle(Color.white)
+                .foregroundStyle(Color.white)
                 
                 HStack() {
                     Text("E").font(.title2).padding([.trailing], 10)
                     VStack(alignment: .leading) {
-                        Text("Awful")
-                        Text("Our worst grade: This service raises some serious concerns regarding privacy.").font(.caption)
+                        Text(String(localized: "grades_e"))
+                        Text(String(localized: "grades_e_desc")).font(.caption)
                     }
                 }
                 .contentShape(Rectangle())
                 .listRowBackground(getColorForRating(rating: "E"))
-                    .foregroundStyle(Color.white)
+                .foregroundStyle(Color.white)
             }
-            Section("Other") {
+            Section(String(localized: "grades_section_other")) {
                 HStack() {
                     Text("N/A").font(.title2).padding([.trailing], 10)
                     VStack(alignment: .leading) {
-                        Text("Not Available")
-                        Text("This service has not received enough curated points to display an accurate grade. Feel free to contribute!").font(.caption)
+                        Text(String(localized: "grades_na"))
+                        Text(String(localized: "grades_na_desc")).font(.caption)
                     }
                 }
                 .contentShape(Rectangle())
                 .listRowBackground(getColorForRating(rating: "N/A"))
-                    .foregroundStyle(Color.white)
+                .foregroundStyle(Color.white)
             }
-        }.navigationTitle("Grades")
+        }.navigationTitle(String(localized: "grades_title"))
     }
 }
 

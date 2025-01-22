@@ -12,43 +12,43 @@ struct AboutView: View {
 
     var body: some View {
         List {
-            Section("Welcome!") {
-                Label("Welcome to ToS;DR!", systemImage: "party.popper.fill").font(.title2)
-                Text("This will guide you through everything there is to know about ToS;DR! Feel free to click anything below to learn more!")
+            Section(String(localized: "about_section_welcome")) {
+                Label(String(localized: "about_welcome"), systemImage: "party.popper.fill").font(.title2)
+                Text(String(localized: "about_welcome_desc"))
             }
-            Section("Organisation") {
-                Text("“Terms of Service; Didn't Read” (short: ToS;DR) is a young project started in June 2012 to help fix the “biggest lie on the web”: almost no one really reads the terms of service we agree to all the time. We aim at rating popular web services Terms of Service and Privacy Policies by summarizing them in “convenient” grades from A to E with so called “Points”.")
-                Text("ToS;DR is a non-profit organization, and all of our team members and contributors do their work as volunteers, with payment being rare. We rely on donations to keep our infrastructure and operations up, and our finances are laid out through our website and collective websites.")
+            Section(String(localized: "about_section_organization")) {
+                Text(String(localized: "about_organization_desc1"))
+                Text(String(localized: "about_organization_desc2"))
             }
             
-            Section("Terminology") {
+            Section(String(localized: "about_section_terminology")) {
                 NavigationLink(destination: GradesExplained()) {
-                    Label("Grades", systemImage: "graduationcap")
+                    Label(String(localized: "about_terminology_grades"), systemImage: "graduationcap")
                 }
                 NavigationLink(destination: PointsExplained()) {
-                    Label("Points", systemImage: "text.quote")
+                    Label(String(localized: "about_terminology_points"), systemImage: "text.quote")
                 }
                 NavigationLink(destination: ServicesExplained()) {
-                    Label("Services", systemImage: "server.rack")
+                    Label(String(localized: "about_terminology_services"), systemImage: "server.rack")
                 }
             }
-            Section("Contribute") {
+            Section(String(localized: "about_section_contribute")) {
                 Button {
                     openURL(URL(string: "https://edit.tosdr.org")!)
                 } label: {
-                    Label("Curate Terms of Service", systemImage: "text.magnifyingglass")
+                    Label(String(localized: "about_contribute_curate"), systemImage: "text.magnifyingglass")
                 }
                 #if os(macOS)
                 .buttonStyle(.plain)
                 #endif
             }
-            Section("This App") {
+            Section(String(localized: "about_section_app")) {
                 NavigationLink(destination: ThanksView()) {
-                    Label("Thanks", systemImage: "heart.fill")
+                    Label(String(localized: "about_app_thanks"), systemImage: "heart.fill")
                 }
             }
             
-        }.navigationTitle("About")
+        }.navigationTitle(String(localized: "label_about"))
     }
 }
 
