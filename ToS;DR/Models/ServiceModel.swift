@@ -16,6 +16,16 @@ final class ServiceModel {
     var urls: String
     var rating: String
     
+    var urlArray: [String] {
+        get {
+            urls.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespacesAndNewlines)) }
+        }
+    }
+    
+    var primaryURL: String {
+        return urlArray.first ?? ""
+    }
+    
     init(id: Int, name: String, urls: String, rating: String) {
         self.id = id
         self.name = name
