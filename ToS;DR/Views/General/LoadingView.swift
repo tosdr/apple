@@ -26,70 +26,127 @@ struct LoadingView: View {
     var state: LoadingState
     var hideWhenIdle: Bool = true
     
+    @State private var isAnimating = false
+    
     var body: some View {
         if hideWhenIdle && state.status == .idle {
             EmptyView()
         } else {
-            VStack(spacing: 16) {
+            VStack(spacing: 20) {
                 switch state.status {
                 case .idle:
                     EmptyView()
                     
                 case .loading:
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                        .scaleEffect(1.5)
-                        .padding(.bottom, 8)
+                    LoadingIndicatorView(isAnimating: $isAnimating)
+                        .onAppear {
+                            withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                                isAnimating = true
+                            }
+                        }
                     
                     Text(state.message ?? String(localized: "loading_message"))
-                        .foregroundColor(.secondary)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
                     
                 case .success:
-                    Image(systemName: "checkmark.circle.fill")
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                        .foregroundColor(.green)
-                        .padding(.bottom, 8)
-                    
-                    if let message = state.message {
-                        Text(message)
-                            .foregroundColor(.secondary)
+                    VStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.green)
+                            .scaleEffect(isAnimating ? 1.2 : 1.0)
+                            .onAppear {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    isAnimating = true
+                                }
+                            }
+                        
+                        if let message = state.message {
+                            Text(message)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
                     }
                     
                 case .error:
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .resizable()
-                        .frame(width: 50, height: 44)
-                        .foregroundColor(.red)
-                        .padding(.bottom, 8)
-                    
-                    if let message = state.message {
-                        Text(message)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    
-                    if let retryAction = state.retryAction {
-                        Button(action: retryAction) {
-                            Text(String(localized: "retry_button"))
-                                .bold()
-                                .padding(.horizontal, 24)
-                                .padding(.vertical, 8)
-                                .background(Color.accentColor)
-                                .foregroundColor(.white)
-                                .cornerRadius(8)
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.red)
+                            .scaleEffect(isAnimating ? 1.1 : 1.0)
+                            .onAppear {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    isAnimating = true
+                                }
+                            }
+                        
+                        if let message = state.message {
+                            Text(message)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
                         }
-                        .padding(.top, 8)
+                        
+                        if let retryAction = state.retryAction {
+                            Button(action: retryAction) {
+                                Text(String(localized: "retry_button"))
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 24)
+                                    .padding(.vertical, 10)
+                                    .background(.blue)
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.top, 4)
+                        }
                     }
                 }
             }
             .padding(32)
+            .frame(maxWidth: 300)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    //.fill(Color(UIColor.systemBackground))
-                    .shadow(color: Color.black.opacity(0.1), radius: 10)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(.systemBackground))
+                    .stroke(Color(.separator), lineWidth: 0.5)
+                    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
             )
             .padding()
+        }
+    }
+}
+
+struct LoadingIndicatorView: View {
+    @Binding var isAnimating: Bool
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.blue.opacity(0.3), lineWidth: 4)
+                .frame(width: 48, height: 48)
+            
+            Circle()
+                .trim(from: 0, to: 0.7)
+                .stroke(
+                    LinearGradient(
+                        colors: [.blue, .blue.opacity(0.3)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                )
+                .frame(width: 48, height: 48)
+                .rotationEffect(.degrees(isAnimating ? 360 : 0))
+                .animation(.linear(duration: 1.0).repeatForever(autoreverses: false), value: isAnimating)
+        }
+        .onAppear {
+            isAnimating = true
         }
     }
 }

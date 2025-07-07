@@ -158,90 +158,193 @@ struct ServicePoints: View {
         self._showLocalizedTitles = showLocalizedTitles
     }
     
-    func getCase(point: Point) -> some View {
-        var icon = "questionmark"
-        var color = Color.gray
-        if (point.type == "blocker") {
-            icon = "hand.raised.fill"
-            color = Color.red
-        } else if (point.type == "bad") {
-            icon = "exclamationmark.triangle.fill"
-            color = Color.orange
-        } else if (point.type == "good") {
-            icon = "hand.thumbsup"
-            color = Color.green
-        } else if (point.type == "neutral") {
-            icon = "hand.point.up"
-        }
-        
-        return HStack {
-            Image(systemName: icon)
-                .frame(width:24, height:24)
-                .foregroundColor(color)
-            Text(showLocalizedTitles && point.localizedTitle != nil ? point.localizedTitle! : point.title)
-#if os(macOS)
-                .font(.title2)
-#endif
+    func getPointIcon(for type: String) -> (systemImage: String, color: Color) {
+        switch type {
+        case "blocker":
+            return ("hand.raised.fill", .red)
+        case "bad":
+            return ("exclamationmark.triangle.fill", .orange)
+        case "good":
+            return ("checkmark.circle.fill", .green)
+        case "neutral":
+            return ("info.circle.fill", .blue)
+        default:
+            return ("questionmark.circle.fill", .gray)
         }
     }
     
-    func getCaseClickable(point: Point) -> some View {
+    func getPointCard(point: Point) -> some View {
+        let iconInfo = getPointIcon(for: point.type)
+        
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: iconInfo.systemImage)
+                    .font(.title2)
+                    .foregroundStyle(iconInfo.color)
+                    .frame(width: 24, height: 24)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(showLocalizedTitles && point.localizedTitle != nil ? point.localizedTitle! : point.title)
+                        .font(.headline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.leading)
+                    
+                    if let description = point.description {
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(3)
+                    }
+                }
+                
+                Spacer()
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .stroke(iconInfo.color.opacity(0.2), lineWidth: 1)
+        )
+    }
+    
+    func getPointClickableCard(point: Point) -> some View {
         return NavigationLink {
             PointView(point: point)
         } label: {
-            getCase(point: point)
+            getPointCard(point: point)
         }
+        .buttonStyle(.plain)
     }
     
     var body: some View {
-        Section(header: Text(String(format: String(localized: "points_section_for"), serviceInfo.name))) {
-            if (serviceInfo.points.keys.contains("blocker")) {
-                Section(header: Text(String(localized: "points_type_blocker"))) {
-                    ForEach(0...(serviceInfo.points["blocker"]?.count ?? 0)-1, id: \.self) {
+        Section(header: 
+            HStack {
+                Text(String(format: String(localized: "points_section_for"), serviceInfo.name))
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+        ) {
+            // Blocker points
+            if let blockerPoints = serviceInfo.points["blocker"], !blockerPoints.isEmpty {
+                Section(header: 
+                    HStack {
+                        Image(systemName: "hand.raised.fill")
+                            .foregroundStyle(.red)
+                        Text(String(localized: "points_type_blocker"))
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Text("\(blockerPoints.count)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.red.opacity(0.1))
+                            .clipShape(Capsule())
+                    }
+                ) {
+                    ForEach(blockerPoints.indices, id: \.self) { index in
                         if clickablePoints {
-                            getCaseClickable(point: serviceInfo.points["blocker"]![$0])
+                            getPointClickableCard(point: blockerPoints[index])
                         } else {
-                            getCase(point: serviceInfo.points["blocker"]![$0])
+                            getPointCard(point: blockerPoints[index])
                         }
                     }
                 }
             }
-            if (serviceInfo.points.keys.contains("bad")) {
-                Section(header: Text(String(localized: "points_type_bad"))) {
-                    ForEach(0...(serviceInfo.points["bad"]?.count ?? 0)-1, id: \.self) {
+            
+            // Bad points
+            if let badPoints = serviceInfo.points["bad"], !badPoints.isEmpty {
+                Section(header: 
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                        Text(String(localized: "points_type_bad"))
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Text("\(badPoints.count)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.orange.opacity(0.1))
+                            .clipShape(Capsule())
+                    }
+                ) {
+                    ForEach(badPoints.indices, id: \.self) { index in
                         if clickablePoints {
-                            getCaseClickable(point: serviceInfo.points["bad"]![$0])
+                            getPointClickableCard(point: badPoints[index])
                         } else {
-                            getCase(point: serviceInfo.points["bad"]![$0])
+                            getPointCard(point: badPoints[index])
                         }
                     }
                 }
             }
-            if (serviceInfo.points.keys.contains("good")) {
-                Section(header: Text(String(localized: "points_type_good"))) {
-                    ForEach(0...(serviceInfo.points["good"]?.count ?? 0)-1, id: \.self) {
+            
+            // Good points
+            if let goodPoints = serviceInfo.points["good"], !goodPoints.isEmpty {
+                Section(header: 
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                        Text(String(localized: "points_type_good"))
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Text("\(goodPoints.count)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.green.opacity(0.1))
+                            .clipShape(Capsule())
+                    }
+                ) {
+                    ForEach(goodPoints.indices, id: \.self) { index in
                         if clickablePoints {
-                            getCaseClickable(point: serviceInfo.points["good"]![$0])
+                            getPointClickableCard(point: goodPoints[index])
                         } else {
-                            getCase(point: serviceInfo.points["good"]![$0])
+                            getPointCard(point: goodPoints[index])
                         }
                     }
                 }
             }
-            if (serviceInfo.points.keys.contains("neutral")) {
-                Section(header: Text(String(localized: "points_type_neutral"))) {
-                    ForEach(0...(serviceInfo.points["neutral"]?.count ?? 0)-1, id: \.self) {
+            
+            // Neutral points
+            if let neutralPoints = serviceInfo.points["neutral"], !neutralPoints.isEmpty {
+                Section(header: 
+                    HStack {
+                        Image(systemName: "info.circle.fill")
+                            .foregroundStyle(.blue)
+                        Text(String(localized: "points_type_neutral"))
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Text("\(neutralPoints.count)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.blue.opacity(0.1))
+                            .clipShape(Capsule())
+                    }
+                ) {
+                    ForEach(neutralPoints.indices, id: \.self) { index in
                         if clickablePoints {
-                            getCaseClickable(point: serviceInfo.points["neutral"]![$0])
+                            getPointClickableCard(point: neutralPoints[index])
                         } else {
-                            getCase(point: serviceInfo.points["neutral"]![$0])
+                            getPointCard(point: neutralPoints[index])
                         }
                     }
                 }
             }
         }
-        
-        
     }
 }
 

@@ -25,32 +25,27 @@ struct ContentView: View {
     
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing: 0) {
+                // Network status banner
                 if !networkMonitor.isConnected {
-                    HStack {
-                        Image(systemName: "wifi.slash")
-                            .foregroundColor(.white)
-                        Text(String(localized: "offline_mode"))
-                            .foregroundColor(.white)
-                            .font(.subheadline)
-                            .bold()
-                        Spacer()
+                    networkStatusBanner
+                }
+                
+                // Main content
+                Group {
+                    if searchResults.isEmpty && (UserDefaults.standard.bool(forKey: "server-search") || searchText == "") {
+                        mainMenuView
+                    } else {
+                        searchResultsView
                     }
-                    .padding()
-                    .background(Color.red.opacity(0.8))
-                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
                 
-                if searchResults.isEmpty && (UserDefaults.standard.bool(forKey: "server-search") || searchText == "") {
-                    mainMenuView
-                } else {
-                    searchResultsView
-                }
-                
+                // Loading overlay
                 if loadingState.status == .loading {
                     LoadingView(state: loadingState)
                 }
             }
+            .background(Color(.systemBackground))
 #if os(iOS)
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: String(localized: "search_prompt"))
 #elseif os(macOS)
@@ -58,9 +53,31 @@ struct ContentView: View {
 #endif
             
 #if os(macOS)
+            // macOS detail view
             NavigationStack {
-                AboutView()
+                VStack {
+                    Image(systemName: "shield.lefthalf.filled")
+                        .font(.system(size: 60))
+                        .foregroundStyle(.blue.gradient)
+                        .padding(.bottom, 16)
+                    
+                    Text("ToS;DR")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .padding(.bottom, 8)
+                    
+                    Text("Select a service or search to get started")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                    
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.controlBackgroundColor))
             }
+            .frame(minWidth: 400)
 #endif
         }
         .onSubmit(of: .search, runSearch)
@@ -68,10 +85,11 @@ struct ContentView: View {
         .toolbar {
 #if os(macOS)
             ToolbarItem(placement: .navigation) {
-                Button(action: toggleSidebar, label: {
+                Button(action: toggleSidebar) {
                     Image(systemName: "sidebar.left")
-                        .accessibilityLabel(String(localized: "toggle_sidebar"))
-                })
+                        .foregroundStyle(.primary)
+                }
+                .help("Toggle Sidebar")
             }
 #endif
             // Database refresh button
@@ -84,6 +102,7 @@ struct ContentView: View {
                     Label(String(localized: "refresh_database"), systemImage: "arrow.clockwise")
                 }
                 .disabled(isRefreshing || !networkMonitor.isConnected)
+                .help("Refresh Database")
             }
         }
         .onChange(of: searchText, initial: false) { _, query in
@@ -93,19 +112,76 @@ struct ContentView: View {
                 runSearch()
             }
         }
-        // Show last database update time
-        .overlay(alignment: .bottom) {
+        // Status bar
+        .safeAreaInset(edge: .bottom) {
             if let lastUpdate = UserDefaults.standard.string(forKey: "lastPullDisplay") {
-                Text(String(format: String(localized: "last_updated"), lastUpdate))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.bottom, 4)
+                HStack {
+                    Image(systemName: "clock")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(String(format: String(localized: "last_updated"), lastUpdate))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 6)
+                .background(Color(.systemBackground).opacity(0.8))
+                .background(.regularMaterial)
             }
         }
     }
     
+    // MARK: - Network Status Banner
+    private var networkStatusBanner: some View {
+        HStack {
+            Image(systemName: "wifi.slash")
+                .foregroundStyle(.white)
+                .fontWeight(.semibold)
+            Text(String(localized: "offline_mode"))
+                .foregroundStyle(.white)
+                .font(.subheadline)
+                .fontWeight(.medium)
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 12)
+        .background(
+            LinearGradient(
+                colors: [Color.red, Color.red.opacity(0.8)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+    
+    // MARK: - Main Menu View
     private var mainMenuView: some View {
         List {
+            // Welcome section for macOS
+#if os(macOS)
+            Section {
+                HStack {
+                    Image(systemName: "shield.lefthalf.filled")
+                        .font(.system(size: 32))
+                        .foregroundStyle(.blue.gradient)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Welcome to ToS;DR")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Text("Terms of Service; Didn't Read")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                .padding(.vertical, 8)
+                .listRowBackground(Color.clear)
+            }
+#endif
+            
             Section(String(localized: "about_section")) {
                 NavigationLink {
 #if os(macOS)
@@ -116,44 +192,65 @@ struct ContentView: View {
                     AboutView()
 #endif
                 } label: {
-                    Label(String(localized: "label_about"), systemImage: "person")
+                    Label(String(localized: "label_about"), systemImage: "info.circle")
                 }
+                
                 NavigationLink {
                     TeamView()
                 } label: {
                     Label(String(localized: "label_team"), systemImage: "person.2")
                 }
+                
                 NavigationLink {
                     SettingsView()
                 } label: {
                     Label(String(localized: "label_settings"), systemImage: "gear")
                 }
+                
                 NavigationLink {
                     DonateView()
                 } label: {
-                    Label(String(localized: "label_donate"), systemImage: "dollarsign")
+                    Label(String(localized: "label_donate"), systemImage: "heart")
                 }
             }
             
-            // Featured services section - uncomment when implemented
-            /* 
-            Section(String(localized: "featured_section")) {
-                FeaturedServices()
+            // Quick stats section
+            Section("Database Statistics") {
+                HStack {
+                    Label("Services", systemImage: "globe")
+                    Spacer()
+                    if let count = getDBCount() {
+                        Text("\(count)")
+                            .fontWeight(.medium)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("Not loaded")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                
+                HStack {
+                    Label("Last Update", systemImage: "clock")
+                    Spacer()
+                    Text(UserDefaults.standard.string(forKey: "lastPull") ?? "Never")
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
+                }
             }
-            */
         }
         .navigationTitle("ToS;DR")
 #if os(macOS)
         .listStyle(.sidebar)
+        .frame(minWidth: 250)
 #endif
         .refreshable {
             await refreshDatabase()
         }
     }
     
-    // Search results view
+    // MARK: - Search Results View
     private var searchResultsView: some View {
-        List(searchResults, id:\.self, selection: $searchResult) { result in
+        List(searchResults, id: \.self, selection: $searchResult) { result in
             NavigationLink {
 #if os(macOS)
                 NavigationStack {
@@ -163,71 +260,32 @@ struct ContentView: View {
                 ServiceView(searchResult: result).navigationTitle(result.name)
 #endif
             } label: {
-                Label {
-                    VStack(alignment: .leading) {
-                        Text(result.name)
-                            .font(.headline)
-                        
-                        // This service might be from a database, so we don't have URLs directly
-                        // We'll leave it without showing a domain for now
-                    }
-                } icon: {
-                    CachedAsyncImage(
-                        url: URL(string: result.icon),
-                        content: { image in
-                            image.resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 32, height: 32)
-                        },
-                        placeholder: {
-                            Image(systemName: "display")
-                                .frame(width: 32, height: 32)
-                        }
-                    )
-                }
-                .padding(.vertical, 4)
+                ServiceRowView(result: result)
             }
             .accessibilityLabel(String(format: String(localized: "service_result_a11y"), result.name, result.grade))
         }
         .navigationTitle(String(localized: "search_title"))
+#if os(macOS)
         .listStyle(.sidebar)
+#endif
         .overlay {
             if loadingState.status == .error {
-                VStack {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.system(size: 50))
-                        .foregroundColor(.red)
-                        .padding()
-                    
-                    Text(loadingState.message ?? String(localized: "search_error"))
-                        .multilineTextAlignment(.center)
-                        .padding()
-                    
-                    Button(String(localized: "retry_button")) {
-                        if let retryAction = loadingState.retryAction {
-                            retryAction()
-                        } else {
-                            runSearch()
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-                .padding()
+                ErrorStateView(
+                    title: "Search Error",
+                    message: loadingState.message ?? String(localized: "search_error"),
+                    retryAction: loadingState.retryAction ?? { runSearch() }
+                )
             } else if searchResults.isEmpty && loadingState.status != .loading {
-                VStack {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 50))
-                        .foregroundColor(.secondary)
-                        .padding()
-                    
-                    Text(String(localized: "no_results_found"))
-                        .foregroundColor(.secondary)
-                }
-                .padding()
+                EmptyStateView(
+                    title: "No Results",
+                    message: String(localized: "no_results_found"),
+                    systemImage: "magnifyingglass"
+                )
             }
         }
     }
     
+    // MARK: - Helper Methods
     private func toggleSidebar() {
 #if os(macOS)
         NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
@@ -334,6 +392,118 @@ struct ContentView: View {
         }
         
         isRefreshing = false
+    }
+}
+
+// MARK: - Supporting Views
+
+struct ServiceRowView: View {
+    let result: SearchResult
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            // Service icon
+            CachedAsyncImage(
+                url: URL(string: result.icon),
+                content: { image in
+                    image.resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 40, height: 40)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                },
+                placeholder: {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Image(systemName: "display")
+                                .foregroundStyle(.secondary)
+                        )
+                }
+            )
+            
+            // Service info
+            VStack(alignment: .leading, spacing: 4) {
+                Text(result.name)
+                    .font(.headline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.primary)
+                
+                Text("Grade: \(result.grade)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            
+            Spacer()
+            
+            // Grade badge
+            Text(result.grade)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(getColorForRating(rating: result.grade))
+                .clipShape(Capsule())
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+struct ErrorStateView: View {
+    let title: String
+    let message: String
+    let retryAction: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 50))
+                .foregroundStyle(.red)
+            
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            
+            Button("Retry", action: retryAction)
+                .buttonStyle(.borderedProminent)
+        }
+        .padding(32)
+        .frame(maxWidth: 300)
+    }
+}
+
+struct EmptyStateView: View {
+    let title: String
+    let message: String
+    let systemImage: String
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: systemImage)
+                .font(.system(size: 50))
+                .foregroundStyle(.secondary)
+            
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding(32)
+        .frame(maxWidth: 300)
     }
 }
 
