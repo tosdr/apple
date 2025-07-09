@@ -37,27 +37,40 @@ struct ContentView: View {
 #endif
                             } label: {
                                 Label(String(localized: "label_about"), systemImage: "person")
+#if os(macOS)
+                                    .padding(.vertical, 4)
+#endif
                             }
                             NavigationLink {
                                 TeamView()
                             } label: {
                                 Label(String(localized: "label_team"), systemImage: "person.2")
+#if os(macOS)
+                                    .padding(.vertical, 4)
+#endif
                             }
                             NavigationLink {
                                 SettingsView()
                             } label: {
                                 Label(String(localized: "label_settings"), systemImage: "gear")
+#if os(macOS)
+                                    .padding(.vertical, 4)
+#endif
                             }
                             NavigationLink {
                                 DonateView()
                             } label: {
                                 Label(String(localized: "label_donate"), systemImage: "dollarsign")
+#if os(macOS)
+                                    .padding(.vertical, 4)
+#endif
                             }
                         }
                     }
                     .navigationTitle("ToS;DR")
 #if os(macOS)
-                    .listStyle(.sidebar)
+                    .listStyle(.insetGrouped)
+                    .padding(.horizontal)
 #endif
                     .refreshable {
                         logger.info("Refreshing local database")
@@ -94,9 +107,17 @@ struct ContentView: View {
                                 )
                             }
                         }
+#if os(macOS)
+                        .padding(.vertical, 2)
+#endif
                     }
                     .navigationTitle(String(localized: "search_title"))
+#if os(macOS)
+                    .listStyle(.insetGrouped)
+                    .padding(.horizontal)
+#else
                     .listStyle(.sidebar)
+#endif
                 }
             }
 #if os(iOS)

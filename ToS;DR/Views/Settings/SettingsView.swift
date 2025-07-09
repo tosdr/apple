@@ -40,6 +40,9 @@ struct SettingsView: View {
                         }}, icon: { Image(systemName: "square.and.arrow.up") }
                     )
                 }.toggleStyle(.switch)
+#if os(macOS)
+                .padding(.vertical, 4)
+#endif
             }
             Section(String(localized: "settings_section_database")) {
                 if (getDBCount() == nil) {
@@ -47,6 +50,9 @@ struct SettingsView: View {
                         Label(String(localized: "settings_db_not_pulled"), systemImage: "questionmark.folder")
                         Text(String(localized: "settings_db_not_pulled_desc")).font(.caption).foregroundColor(.secondary)
                     }
+#if os(macOS)
+                    .padding(.vertical, 4)
+#endif
                 } else {
                     HStack {
                         VStack(alignment: .leading) {
@@ -56,6 +62,9 @@ struct SettingsView: View {
                         Spacer()
                         Text(defaults.string(forKey: "lastPull") ?? "None").foregroundColor(.secondary)
                     }
+#if os(macOS)
+                    .padding(.vertical, 4)
+#endif
                     HStack {
                         VStack(alignment: .leading) {
                             Label(String(localized: "settings_db_services"), systemImage: "globe")
@@ -64,6 +73,9 @@ struct SettingsView: View {
                         Spacer()
                         Text(String(getDBCount() ?? 0)).foregroundColor(.secondary)
                     }
+#if os(macOS)
+                    .padding(.vertical, 4)
+#endif
                 }
                 Button {
                     Task {
@@ -97,6 +109,7 @@ struct SettingsView: View {
                 }
 #if os(macOS)
                 .buttonStyle(.plain)
+                .padding(.vertical, 4)
 #endif
                 Button {
                     if (deleteDB(context: modelContext)) {
@@ -109,6 +122,7 @@ struct SettingsView: View {
                 
 #if os(macOS)
                     .buttonStyle(.plain)
+                    .padding(.vertical, 4)
 #endif
             }
             .id(refresh)
@@ -118,6 +132,9 @@ struct SettingsView: View {
                         Text(server)
                     }
                 }
+#if os(macOS)
+                .padding(.vertical, 4)
+#endif
                 
                 if (serverSelected == "Custom") {
                     HStack {
@@ -129,6 +146,9 @@ struct SettingsView: View {
                                 defaults.setValue(value, forKey: "serverUrl")
                             }
                     }
+#if os(macOS)
+                    .padding(.vertical, 4)
+#endif
                 }
                 
             }.onChange(of: serverSelected, initial: false) { _, value in
@@ -146,7 +166,12 @@ struct SettingsView: View {
                     .contentShape(Rectangle())
             }
             #endif
-        }.navigationTitle(String(localized: "label_settings"))
+        }
+        .navigationTitle(String(localized: "label_settings"))
+#if os(macOS)
+        .listStyle(.insetGrouped)
+        .padding(.horizontal)
+#endif
     }
 }
 

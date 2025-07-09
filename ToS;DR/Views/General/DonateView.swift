@@ -20,6 +20,9 @@ struct DonateView: View {
                         Text(String(localized: "donate_hello_desc"))
                     }
                 }
+#if os(macOS)
+                .padding(.vertical, 6)
+#endif
                 HStack {
                     Image(systemName: "server.rack").frame(width: 32, height: 32)
                     VStack(alignment: .leading) {
@@ -27,6 +30,9 @@ struct DonateView: View {
                         Text(String(localized: "donate_server_desc"))
                     }
                 }
+#if os(macOS)
+                .padding(.vertical, 6)
+#endif
                 HStack {
                     Image(systemName: "key").frame(width: 32, height: 32)
                     VStack(alignment: .leading) {
@@ -34,6 +40,9 @@ struct DonateView: View {
                         Text(String(localized: "donate_licenses_desc"))
                     }
                 }
+#if os(macOS)
+                .padding(.vertical, 6)
+#endif
                 HStack {
                     Image(systemName: "cup.and.saucer").frame(width: 32, height: 32)
                     VStack(alignment: .leading) {
@@ -41,11 +50,17 @@ struct DonateView: View {
                         Text(String(localized: "donate_personal_desc"))
                     }
                 }
+#if os(macOS)
+                .padding(.vertical, 6)
+#endif
             }
             
             Section(String(localized: "donate_section_donate")) {
                 if (store.products.isEmpty) {
                     Text(String(localized: "donate_error_appstore"))
+#if os(macOS)
+                        .padding(.vertical, 6)
+#endif
                 }
                 ForEach(store.products) { product in
                     HStack {
@@ -62,11 +77,18 @@ struct DonateView: View {
                             }
                         }.buttonStyle(.borderedProminent)
                     }
+#if os(macOS)
+                    .padding(.vertical, 6)
+#endif
                 }
             }
         }
         .listRowSeparator(.hidden)
         .navigationTitle(String(localized: "label_donate"))
+#if os(macOS)
+        .listStyle(.insetGrouped)
+        .padding(.horizontal)
+#endif
     }
 }
 

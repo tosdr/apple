@@ -60,7 +60,7 @@ struct ToS_DRApp: App {
                     unlockBetaIconIfTesting()
                     updateDBIfOld()
                 }
-                .frame(minWidth: 700)
+                .frame(minWidth: 900, minHeight: 600)
             #else
             if firstStart {
                 OnboardingView()

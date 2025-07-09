@@ -97,6 +97,9 @@ struct ServiceHeader: View {
             .padding(12.0)
             Text(serviceInfo.name)
                 .font(.title)
+#if os(macOS)
+                .padding(.bottom, 8)
+#endif
             //.padding([.top], 12.0)
             if (scrollable) {
                 ScrollView(.horizontal,showsIndicators: false) {
@@ -134,6 +137,9 @@ struct ServiceHeader: View {
                 badges()
             }
         }
+#if os(macOS)
+        .padding(.vertical, 12)
+#endif
     }
 }
 
@@ -172,9 +178,13 @@ struct ServicePoints: View {
                 .foregroundColor(color)
             Text(showLocalizedTitles && point.localizedTitle != nil ? point.localizedTitle! : point.title)
 #if os(macOS)
-                .font(.title2)
+                .font(.body)
+                .padding(.leading, 4)
 #endif
         }
+#if os(macOS)
+        .padding(.vertical, 6)
+#endif
     }
     
     func getCaseClickable(point: Point) -> some View {

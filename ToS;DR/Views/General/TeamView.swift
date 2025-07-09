@@ -35,6 +35,9 @@ struct TeamView: View {
             }
             #if os(iOS)
             .listStyle(.grouped)
+            #elseif os(macOS)
+            .listStyle(.insetGrouped)
+            .padding(.horizontal)
             #endif
             .navigationTitle(String(localized: "label_team"))
         } else {
@@ -153,6 +156,9 @@ struct TeamMemberView: View {
         .padding()
         .listRowInsets(EdgeInsets())
         .buttonStyle(PlainButtonStyle())
+#if os(macOS)
+        .listRowBackground(Color(.controlBackgroundColor))
+#endif
     }
 }
 

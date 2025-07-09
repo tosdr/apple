@@ -14,23 +14,44 @@ struct AboutView: View {
         List {
             Section(String(localized: "about_section_welcome")) {
                 Label(String(localized: "about_welcome"), systemImage: "party.popper.fill").font(.title2)
+#if os(macOS)
+                    .padding(.vertical, 4)
+#endif
                 Text(String(localized: "about_welcome_desc"))
+#if os(macOS)
+                    .padding(.vertical, 4)
+#endif
             }
             Section(String(localized: "about_section_organization")) {
                 Text(String(localized: "about_organization_desc1"))
+#if os(macOS)
+                    .padding(.vertical, 4)
+#endif
                 Text(String(localized: "about_organization_desc2"))
+#if os(macOS)
+                    .padding(.vertical, 4)
+#endif
             }
             
             Section(String(localized: "about_section_terminology")) {
                 NavigationLink(destination: GradesExplained()) {
                     Label(String(localized: "about_terminology_grades"), systemImage: "graduationcap")
                 }
+#if os(macOS)
+                .padding(.vertical, 4)
+#endif
                 NavigationLink(destination: PointsExplained()) {
                     Label(String(localized: "about_terminology_points"), systemImage: "text.quote")
                 }
+#if os(macOS)
+                .padding(.vertical, 4)
+#endif
                 NavigationLink(destination: ServicesExplained()) {
                     Label(String(localized: "about_terminology_services"), systemImage: "server.rack")
                 }
+#if os(macOS)
+                .padding(.vertical, 4)
+#endif
             }
             Section(String(localized: "about_section_contribute")) {
                 Button {
@@ -40,15 +61,24 @@ struct AboutView: View {
                 }
                 #if os(macOS)
                 .buttonStyle(.plain)
+                .padding(.vertical, 4)
                 #endif
             }
             Section(String(localized: "about_section_app")) {
                 NavigationLink(destination: ThanksView()) {
                     Label(String(localized: "about_app_thanks"), systemImage: "heart.fill")
                 }
+#if os(macOS)
+                .padding(.vertical, 4)
+#endif
             }
             
-        }.navigationTitle(String(localized: "label_about"))
+        }
+        .navigationTitle(String(localized: "label_about"))
+#if os(macOS)
+        .listStyle(.insetGrouped)
+        .padding(.horizontal)
+#endif
     }
 }
 

@@ -50,6 +50,12 @@ struct ServiceView: View {
     var body: some View {
         if (searchResult == nil) {
             Text(String(localized: "service_no_selection"))
+#if os(macOS)
+                .font(.title2)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.controlBackgroundColor))
+#endif
         } else if (serviceInfo == nil) {
             if (!errorAcknowledge) {
                 ProgressView().frame(minWidth: 100, minHeight: 100).task(id: serviceInfo?.id) {
@@ -83,12 +89,21 @@ struct ServiceView: View {
                             Image(systemName: "pc")
                                 .font(.system(size: 150))
                                 .padding([.bottom], 12.0)
+#if os(macOS)
+                                .foregroundColor(.secondary)
+#endif
                             Text(String(localized: "service_error_title"))
+#if os(macOS)
+                                .font(.title2)
+                                .foregroundColor(.primary)
+#endif
 #if os(macOS)
                             Button(String(localized: "service_error_retry")) {
                                 errorAcknowledge.toggle()
                                 error = ""
                             }
+                            .buttonStyle(.borderedProminent)
+                            .padding(.top, 8)
 #else
                             Text(String(localized: "service_error_pull"))
 #endif
@@ -109,6 +124,9 @@ struct ServiceView: View {
                     ServiceHeader(serviceInfo: serviceInfo!)
                 }.listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets())
+#if os(macOS)
+                    .listRowBackground(Color.clear)
+#endif
                 ServicePoints(serviceInfo: serviceInfo!, clickable: true, showLocalizedTitles: $showLocalizedTitles)
                 
                 if hasLocalizedTitles() {
@@ -123,11 +141,21 @@ struct ServiceView: View {
                             Image(systemName: "exclamationmark.octagon.fill")
                                 .foregroundStyle(.red)
                         }
+#if os(macOS)
+                        .padding(.vertical, 4)
+#endif
                         Toggle(String(localized: "service_localization_toggle"), isOn: $showLocalizedTitles)
+#if os(macOS)
+                            .padding(.vertical, 4)
+#endif
                     }
                     
                 }
             }
+#if os(macOS)
+            .listStyle(.insetGrouped)
+            .padding(.horizontal)
+#endif
         }
     }
 }
