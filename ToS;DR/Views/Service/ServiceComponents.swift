@@ -44,8 +44,6 @@ struct ServiceHeader: View {
                     .onTapGesture {
                         showAlert.toggle()
                     }
-                    .accessibilityLabel(String(localized: "service_badge_reviewed_a11y"))
-                    .accessibilityHint(String(localized: "service_badge_reviewed_hint"))
                     .alert(isPresented: $showAlert, content: {
                         Alert(
                             title: Text(String(localized: "service_review_title")), 
@@ -60,8 +58,6 @@ struct ServiceHeader: View {
                 .foregroundColor(.white)
                 .background(getColorForRating(rating: serviceInfo.grade))
                 .cornerRadius(20)
-                .accessibilityLabel(String(format: String(localized: "service_badge_grade_a11y"), String(serviceInfo.grade)))
-                .accessibilityAddTraits(.isButton)
             
             Label(String(format: String(localized: "service_badge_points"), String(serviceInfo.points.totalCount())), systemImage: "exclamationmark.triangle.fill")
                 .padding(5)
@@ -95,14 +91,10 @@ struct ServiceHeader: View {
                 },
                 placeholder: {
                     Image(systemName: "display")
-                        .frame(width: 75, height: 75)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(6.0)
                 }
             )
             .cornerRadius(6.0)
             .padding(12.0)
-            .accessibilityLabel(String(format: String(localized: "service_icon_a11y"), serviceInfo.name))
             Text(serviceInfo.name)
                 .font(.title)
             //.padding([.top], 12.0)

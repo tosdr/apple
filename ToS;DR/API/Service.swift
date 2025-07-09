@@ -67,7 +67,7 @@ struct ServiceResponse: Codable {
         let status: String?
         let analysis: String?
         let case_info: Case?
-        let document_id: Int?
+        let document_id: Int
         let updated_at: String
         let created_at: String
         
@@ -112,10 +112,7 @@ func GetServicePageById(service: Int) async -> Response {
             break
         }
         
-        guard let url = URL(string: urlString) else {
-            return Response(error: true, message: String(localized: "api_error_invalid_url"), response: nil)
-        }
-        
+        let url = URL(string: urlString)!
         let timeoutInterval: TimeInterval = 10
         
         let configuration = URLSessionConfiguration.default
@@ -131,9 +128,7 @@ func GetServicePageById(service: Int) async -> Response {
         }
         
         guard httpResponse.statusCode == 200 else {
-            return Response(error: true,
-                           message: APIError.getErrorMessage(statusCode: httpResponse.statusCode),
-                           response: nil)
+            return Response(error: true, message: "HTTP Error: \(httpResponse.statusCode)", response: nil)
         }
         
         let serviceResponse = try JSONDecoder().decode(ServiceResponse.self, from: data)
@@ -185,7 +180,7 @@ func getColorForRating(rating: String) -> Color {
     switch(rating) {
     case "A": hexcode = "408558"
     case "B": hexcode = "87b55f"
-    case "C": hexcode = "f5c344" // Removed # prefix for consistency
+    case "C": hexcode = "#f5c344"
     case "D": hexcode = "c9753d"
     case "E": hexcode = "cb444b"
     default:  hexcode = "222529"
