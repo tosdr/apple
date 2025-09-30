@@ -6,67 +6,114 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct DonateView: View {
-    var store = Store()
-    
+    @StateObject private var viewModel = DonateViewModel()
+    @State private var showError = false
+
     var body: some View {
-        List {
-            Section(String(localized: "donate_section_why")) {
-                HStack {
-                    Image(systemName: "dollarsign").frame(width: 32, height: 32)
-                    VStack(alignment: .leading) {
-                        Text(String(localized: "donate_hello_title")).font(.title3)
-                        Text(String(localized: "donate_hello_desc"))
-                    }
-                }
-                HStack {
-                    Image(systemName: "server.rack").frame(width: 32, height: 32)
-                    VStack(alignment: .leading) {
-                        Text(String(localized: "donate_server_title")).font(.title3)
-                        Text(String(localized: "donate_server_desc"))
-                    }
-                }
-                HStack {
-                    Image(systemName: "key").frame(width: 32, height: 32)
-                    VStack(alignment: .leading) {
-                        Text(String(localized: "donate_licenses_title")).font(.title3)
-                        Text(String(localized: "donate_licenses_desc"))
-                    }
-                }
-                HStack {
-                    Image(systemName: "cup.and.saucer").frame(width: 32, height: 32)
-                    VStack(alignment: .leading) {
-                        Text(String(localized: "donate_personal_title")).font(.title3)
-                        Text(String(localized: "donate_personal_desc"))
-                    }
-                }
+        GroupedList {
+            GroupedListSection {
+                Text(String(localized: "donate_section_why"))
+            } content: {
+                DonateInfoRow(
+                    icon: "dollarsign",
+                    title: String(localized: "donate_hello_title"),
+                    description: String(localized: "donate_hello_desc"),
+                    isFirst: true
+                )
+                DonateInfoRow(
+                    icon: "server.rack",
+                    title: String(localized: "donate_server_title"),
+                    description: String(localized: "donate_server_desc")
+                )
+                DonateInfoRow(
+                    icon: "key",
+                    title: String(localized: "donate_licenses_title"),
+                    description: String(localized: "donate_licenses_desc")
+                )
+                DonateInfoRow(
+                    icon: "cup.and.saucer",
+                    title: String(localized: "donate_personal_title"),
+                    description: String(localized: "donate_personal_desc"),
+                    isLast: true
+                )
             }
-            
-            Section(String(localized: "donate_section_donate")) {
-                if (store.products.isEmpty) {
-                    Text(String(localized: "donate_error_appstore"))
-                }
-                ForEach(store.products) { product in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(product.displayName)
-                            Text(product.description)
-                                .font(.caption)
+
+            GroupedListSection {
+                Text(String(localized: "donate_section_donate"))
+            } content: {
+                if viewModel.products.isEmpty {
+                    GroupedListItem(
+                        content: {
+                            Text(String(localized: "donate_error_appstore"))
                                 .foregroundColor(.secondary)
-                        }
-                        Spacer()
-                        Button(product.displayPrice) {
-                            Task {
-                                try await store.purchase(product)
-                            }
-                        }.buttonStyle(.borderedProminent)
+                        },
+                        isFirst: true,
+                        isLast: true
+                    )
+                } else {
+                    ForEach(Array(viewModel.products.enumerated()), id: \.element.id) { index, product in
+                        GroupedListItem(
+                            content: {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(product.displayName)
+                                        .font(.headline)
+                                    Text(product.description)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            },
+                            trailing: {
+                                Button(product.displayPrice) {
+                                    Task {
+                                        await viewModel.purchase(product)
+                                        showError = viewModel.errorMessage != nil
+                                    }
+                                }
+                                .buttonStyle(.borderedProminent)
+                            },
+                            isFirst: index == 0,
+                            isLast: index == viewModel.products.count - 1
+                        )
                     }
                 }
             }
         }
-        .listRowSeparator(.hidden)
         .navigationTitle(String(localized: "label_donate"))
+        .alert(isPresented: $showError) {
+            Alert(
+                title: Text(String(localized: "service_error_title")),
+                message: Text(viewModel.errorMessage ?? ""),
+                dismissButton: .default(Text(String(localized: "ok")))
+            )
+        }
+    }
+}
+
+private struct DonateInfoRow: View {
+    let icon: String
+    let title: String
+    let description: String
+    var isFirst: Bool = false
+    var isLast: Bool = false
+
+    var body: some View {
+        GroupedListItem(
+            icon: { Image(systemName: icon) },
+            content: {
+                VStack(alignment: .leading) {
+                    Text(title)
+                        .font(.headline)
+                    Text(description)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            },
+            isFirst: isFirst,
+            isLast: isLast
+        )
     }
 }
 

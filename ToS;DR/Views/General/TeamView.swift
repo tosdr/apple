@@ -9,47 +9,66 @@ import SwiftUI
 import CachedAsyncImage
 
 struct TeamView: View {
-    @State private var team: Team?
-    @Environment(\.openURL) var openURL
-    
+    @StateObject private var viewModel = TeamViewModel()
+
     var body: some View {
-        if let team = team {
-            List {
-                Section(String(localized: "team_section_founders")) {
-                    ForEach(team.founders, id: \.name) { member in
-                        TeamMemberView(member: member)
-                    }
+        Group {
+            if let team = viewModel.team {
+                GroupedList {
+                    teamSection(title: String(localized: "team_section_founders"), members: team.founders)
+                    teamSection(title: String(localized: "team_section_current"), members: team.current)
+                    teamSection(title: String(localized: "team_section_past"), members: team.past)
                 }
-                
-                Section(String(localized: "team_section_current")) {
-                    ForEach(team.current, id: \.name) { member in
-                        TeamMemberView(member: member)
-                    }
+                .navigationTitle(String(localized: "label_team"))
+                .refreshable {
+                    await viewModel.refresh()
                 }
-                
-                Section(String(localized: "team_section_past")) {
-                    ForEach(team.past, id: \.name) { member in
-                        TeamMemberView(member: member)
+            } else if viewModel.isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let error = viewModel.errorMessage {
+                VStack(spacing: 12) {
+                    Text(error)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.secondary)
+                    Button(String(localized: "service_error_retry")) {
+                        Task { await viewModel.refresh() }
                     }
+                    .buttonStyle(.borderedProminent)
                 }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            #if os(iOS)
-            .listStyle(.grouped)
-            #endif
-            .navigationTitle(String(localized: "label_team"))
-        } else {
-            ProgressView()
-                .task {
-                    team = await GetTeam()
-                }
+        }
+        .task {
+            await viewModel.loadTeam()
+        }
+    }
+
+    private func teamSection(title: String, members: [TeamMember]) -> some View {
+        GroupedListSection {
+            Text(title)
+        } content: {
+            ForEach(Array(members.enumerated()), id: \.offset) { index, member in
+                GroupedListItem(
+                    content: {
+                        TeamMemberRow(member: member)
+                    },
+                    isFirst: index == 0,
+                    isLast: index == members.count - 1
+                )
+            }
         }
     }
 }
 
-struct TeamMemberView: View {
-    @Environment(\.openURL) var openURL
+private struct TeamMemberRow: View {
+    @Environment(\.openURL) private var openURL
     let member: TeamMember
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 15) {
@@ -68,7 +87,7 @@ struct TeamMemberView: View {
                             .foregroundColor(.secondary)
                     }
                 )
-                
+
                 VStack(alignment: .leading) {
                     Text(member.name)
                         .font(.headline)
@@ -79,86 +98,70 @@ struct TeamMemberView: View {
                     }
                 }
             }
-            
+
             Text(.init(member.description))
                 .font(.body)
                 .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)
-            
+
             if !member.links.isEmpty {
                 HStack(spacing: 15) {
                     if let email = member.links.email {
-                        Button {
+                        TeamLinkButton(image: Image(systemName: "envelope.fill")) {
                             openURL(URL(string: "mailto:\(email)")!)
-                        } label: {
-                            Image(systemName: "envelope.fill")
-                                .foregroundColor(.accentColor)
-                                .frame(width: 44, height: 44)
-                                .contentShape(Rectangle())
                         }
                     }
-                    
+
                     if let github = member.links.github {
-                        Button {
+                        TeamLinkButton(image: Image("github").renderingMode(.template)) {
                             openURL(URL(string: github)!)
-                        } label: {
-                            Image("github")
-                                .renderingMode(.template)
-                                .resizable()
-                                .frame(width: 15, height: 15)
-                                .foregroundColor(.accentColor)
-                                .frame(width: 44, height: 44)
-                                .contentShape(Rectangle())
                         }
                     }
-                    
+
                     if let website = member.links.website {
-                        Button {
+                        TeamLinkButton(image: Image(systemName: "globe")) {
                             openURL(URL(string: website)!)
-                        } label: {
-                            Image(systemName: "globe")
-                                .foregroundColor(.accentColor)
-                                .frame(width: 44, height: 44)
-                                .contentShape(Rectangle())
                         }
                     }
-                    
+
                     if let mastodon = member.links.mastodon {
-                        Button {
+                        TeamLinkButton(image: Image("mastodon").renderingMode(.template)) {
                             openURL(URL(string: mastodon)!)
-                        } label: {
-                            Image("mastodon")
-                                .renderingMode(.template)
-                                .resizable()
-                                .frame(width: 15, height: 15)
-                                .foregroundColor(.accentColor)
-                                .frame(width: 44, height: 44)
-                                .contentShape(Rectangle())
                         }
                     }
-                    
+
                     if let twitter = member.links.twitter {
-                        Button {
+                        TeamLinkButton(image: Image(systemName: "bird.fill")) {
                             openURL(URL(string: twitter)!)
-                        } label: {
-                            Image(systemName: "bird.fill")
-                                .foregroundColor(.accentColor)
-                                .frame(width: 44, height: 44)
-                                .contentShape(Rectangle())
                         }
                     }
                 }
             }
         }
-        .padding()
-        .listRowInsets(EdgeInsets())
-        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+private struct TeamLinkButton: View {
+    let image: Image
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            image
+                .resizable()
+                .scaledToFit()
+                .frame(width: 15, height: 15)
+                .foregroundColor(.accentColor)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
 extension TeamMemberLinks {
     var isEmpty: Bool {
-        return email == nil && github == nil && twitter == nil && website == nil && mastodon == nil
+        email == nil && github == nil && twitter == nil && website == nil && mastodon == nil
     }
 }
 

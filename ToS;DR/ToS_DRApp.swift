@@ -61,6 +61,9 @@ struct ToS_DRApp: App {
                     updateDBIfOld()
                 }
                 .frame(minWidth: 700)
+                .sheet(isPresented: $firstStart) {
+                    OnboardingView()
+                }
             #else
             if firstStart {
                 OnboardingView()

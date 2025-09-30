@@ -9,58 +9,96 @@ import SwiftUI
 
 struct PointsExplained: View {
     var body: some View {
-        List {
-            Section(String(localized: "points_section_classifications")) {
-                HStack() {
-                    VStack(alignment: .leading) {
-                        Label(String(localized: "points_blocker"), systemImage: "hand.raised.fill").font(.title2)
-                        Text(String(localized: "points_blocker_desc")).font(.caption)
-                    }
-                }
-                .contentShape(Rectangle())
-                .listRowBackground(Color.red)
-                .foregroundStyle(Color.white)
-                
-                HStack() {
-                    VStack(alignment: .leading) {
-                        Label(String(localized: "points_bad"), systemImage: "exclamationmark.triangle.fill").font(.title2)
-                        Text(String(localized: "points_bad_desc")).font(.caption)
-                    }
-                }
-                .contentShape(Rectangle())
-                .listRowBackground(Color.orange)
-                .foregroundStyle(Color.white)
-                
-                HStack() {
-                    VStack(alignment: .leading) {
-                        Label(String(localized: "points_good"), systemImage: "hand.thumbsup").font(.title2)
-                        Text(String(localized: "points_good_desc")).font(.caption)
-                    }
-                }
-                .contentShape(Rectangle())
-                .listRowBackground(Color.green)
-                .foregroundStyle(Color.white)
-                
-                HStack() {
-                    VStack(alignment: .leading) {
-                        Label(String(localized: "points_neutral"), systemImage: "hand.point.up").font(.title2)
-                        Text(String(localized: "points_neutral_desc")).font(.caption)
-                    }
-                }
-                .contentShape(Rectangle())
-                .listRowBackground(Color.gray)
-                .foregroundStyle(Color.white)
+        GroupedList {
+            GroupedListSection {
+                Text(String(localized: "points_section_classifications"))
+            } content: {
+                PointClassificationCard(
+                    title: String(localized: "points_blocker"),
+                    description: String(localized: "points_blocker_desc"),
+                    icon: "hand.raised.fill",
+                    color: .red,
+                    isFirst: true
+                )
+                PointClassificationCard(
+                    title: String(localized: "points_bad"),
+                    description: String(localized: "points_bad_desc"),
+                    icon: "exclamationmark.triangle.fill",
+                    color: .orange
+                )
+                PointClassificationCard(
+                    title: String(localized: "points_good"),
+                    description: String(localized: "points_good_desc"),
+                    icon: "hand.thumbsup",
+                    color: .green
+                )
+                PointClassificationCard(
+                    title: String(localized: "points_neutral"),
+                    description: String(localized: "points_neutral_desc"),
+                    icon: "hand.point.up",
+                    color: .gray,
+                    isLast: true
+                )
             }
-            
-            Section(String(localized: "points_section_calculation")) {
-                Text(String(localized: "points_calculation_intro")).font(.caption)
-                Text(String(localized: "points_calculation_a")).font(.caption)
-                Text(String(localized: "points_calculation_b")).font(.caption)
-                Text(String(localized: "points_calculation_c")).font(.caption)
-                Text(String(localized: "points_calculation_d")).font(.caption)
-                Text(String(localized: "points_calculation_e")).font(.caption)
+
+            GroupedListSection {
+                Text(String(localized: "points_section_calculation"))
+            } content: {
+                GroupedListItem(
+                    content: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(String(localized: "points_calculation_intro"))
+                            Text(String(localized: "points_calculation_a"))
+                            Text(String(localized: "points_calculation_b"))
+                            Text(String(localized: "points_calculation_c"))
+                            Text(String(localized: "points_calculation_d"))
+                            Text(String(localized: "points_calculation_e"))
+                        }
+                        .font(.caption)
+                    },
+                    isFirst: true,
+                    isLast: true
+                )
             }
-        }.navigationTitle(String(localized: "points_title"))
+        }
+        .navigationTitle(String(localized: "points_title"))
+    }
+}
+
+private struct PointClassificationCard: View {
+    let title: String
+    let description: String
+    let icon: String
+    let color: Color
+    var isFirst: Bool = false
+    var isLast: Bool = false
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(.white)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                Text(description)
+                    .font(.caption)
+            }
+            .foregroundColor(.white)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, innerPadding)
+        .padding(.vertical, innerPadding)
+        .background(color)
+        .foregroundColor(.white)
+        .overlay(
+            Rectangle()
+                .frame(height: 0.5)
+                .foregroundColor(Color.platformSeparator)
+                .opacity(isLast ? 0 : 1),
+            alignment: .bottom
+        )
     }
 }
 

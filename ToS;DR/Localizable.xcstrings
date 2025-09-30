@@ -6425,6 +6425,23 @@
         }
       }
     },
+    "service_links" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Links"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Links"
+          }
+        }
+      }
+    },
     "service_localization" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -6,78 +6,113 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SettingsView: View {
-    let defaults = UserDefaults.standard
-    @State private var refresh: Bool = false
     @Environment(\.modelContext) private var modelContext
-    
-    var servers = ["api.tosdr.org", "api.staging.tosdr.org", "Custom"]
-    
-    @State var isLoading = false
-    @State var isShown = false
-    
-    @AppStorage("server") var serverSelected = "api.tosdr.org"
-    @AppStorage("serverUrl") var customServer = ""
-    
-    @AppStorage("server-search") var serverSearch = false
+    @StateObject private var viewModel = SettingsViewModel()
+    @State private var showUpdateError = false
     
     var body: some View {
-        List {
-            Section(String(localized: "settings_section_app")) {
+        GroupedList {
+            appSection
+            databaseSection
+            apiSection
+            resetSection
+        }
+        .navigationTitle(String(localized: "label_settings"))
+        .alert(isPresented: $showUpdateError) {
+            Alert(
+                title: Text(String(localized: "settings_error_title")),
+                message: Text(viewModel.updateError ?? String(localized: "settings_error_db_update")),
+                dismissButton: .default(Text(String(localized: "ok")))
+            )
+        }
+    }
+    
+    private var appSection: some View {
+        GroupedListSection {
+            Text(String(localized: "settings_section_app"))
+        } content: {
 #if os(iOS)
-                NavigationLink(destination: AppIconSetting()) {
-                    Label("App Icon", systemImage: "app.dashed")
-                }
+            GroupedListNavigationLink(
+                icon: { Image(systemName: "app.dashed") },
+                content: { Text("App Icon") },
+                destination: { AppIconSetting() },
+                isFirst: true
+            )
 #endif
-                // local/server search setting
-                Toggle(isOn: $serverSearch) {
-                    Label(title: {
-                        VStack(alignment: .leading) {
-                            Text(String(localized: "settings_server_search_title"))
-                            Text(String(localized: "settings_server_search_desc")).font(.caption).foregroundColor(.secondary)
-                            
-                        }}, icon: { Image(systemName: "square.and.arrow.up") }
-                    )
-                }.toggleStyle(.switch)
+            GroupedListToggle(
+                icon: { Image(systemName: "square.and.arrow.up") },
+                content: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(String(localized: "settings_server_search_title"))
+                        Text(String(localized: "settings_server_search_desc"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                },
+                isOn: serverSearchBinding,
+                isFirst: true,
+                isLast: true
+            )
+        }
+    }
+    
+    private var databaseSection: some View {
+        GroupedListSection {
+            Text(String(localized: "settings_section_database"))
+        } content: {
+            if let lastPull = viewModel.lastPull {
+                GroupedListItem(
+                    content: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Label(String(localized: "settings_db_date"), systemImage: "calendar.badge.clock")
+                                Text(String(localized: "settings_db_date_desc"))
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Text(lastPull)
+                                .foregroundColor(.secondary)
+                        }
+                    },
+                    isFirst: true
+                )
+                
+                GroupedListItem(
+                    content: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Label(String(localized: "settings_db_services"), systemImage: "globe")
+                                Text(String(localized: "settings_db_services_desc"))
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Text(String(viewModel.serviceCount ?? 0))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                )
+            } else {
+                GroupedListItem(
+                    content: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Label(String(localized: "settings_db_not_pulled"), systemImage: "questionmark.folder")
+                            Text(String(localized: "settings_db_not_pulled_desc"))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    },
+                    isFirst: true
+                )
             }
-            Section(String(localized: "settings_section_database")) {
-                if (getDBCount() == nil) {
-                    VStack(alignment: .leading) {
-                        Label(String(localized: "settings_db_not_pulled"), systemImage: "questionmark.folder")
-                        Text(String(localized: "settings_db_not_pulled_desc")).font(.caption).foregroundColor(.secondary)
-                    }
-                } else {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Label(String(localized: "settings_db_date"), systemImage: "calendar.badge.clock")
-                            Text(String(localized: "settings_db_date_desc")).font(.caption).foregroundColor(.secondary)
-                        }
-                        Spacer()
-                        Text(defaults.string(forKey: "lastPull") ?? "None").foregroundColor(.secondary)
-                    }
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Label(String(localized: "settings_db_services"), systemImage: "globe")
-                            Text(String(localized: "settings_db_services_desc")).font(.caption).foregroundColor(.secondary)
-                        }
-                        Spacer()
-                        Text(String(getDBCount() ?? 0)).foregroundColor(.secondary)
-                    }
-                }
-                Button {
-                    Task {
-                        isLoading = true
-                        if (await updateDB(context: modelContext).value) {
-                            refresh.toggle()
-                            isLoading = false
-                        } else {
-                            isLoading = false
-                            isShown.toggle()
-                        }
-                    }
-                } label: {
-                    if (isLoading) {
+            
+            GroupedListButton(
+                content: {
+                    if viewModel.isUpdating {
                         HStack {
                             Label(String(localized: "settings_db_refreshing"), systemImage: "arrow.clockwise")
                             Spacer()
@@ -86,67 +121,99 @@ struct SettingsView: View {
                     } else {
                         Label(String(localized: "settings_db_refresh"), systemImage: "arrow.down.doc")
                     }
-                }
-                .contentShape(Rectangle())
-                .alert(isPresented: $isShown) {
-                    Alert(
-                        title: Text(String(localized: "settings_error_title")),
-                        message: Text(String(localized: "settings_error_db_update")),
-                        dismissButton: .default(Text("OK"))
-                    )
-                }
-#if os(macOS)
-                .buttonStyle(.plain)
-#endif
-                Button {
-                    if (deleteDB(context: modelContext)) {
-                        refresh.toggle()
+                },
+                action: {
+                    Task {
+                        let success = await viewModel.refreshDatabase(context: modelContext)
+                        showUpdateError = !success
                     }
-                } label: {
+                }
+            )
+            
+            GroupedListButton(
+                content: {
                     Label(String(localized: "settings_db_delete"), systemImage: "minus.circle")
-                }.foregroundStyle(.red)
-                    .contentShape(Rectangle())
-                
-#if os(macOS)
-                    .buttonStyle(.plain)
-#endif
-            }
-            .id(refresh)
-            Section(String(localized: "settings_section_api")) {
-                Picker(String(localized: "settings_api_server"), selection: $serverSelected) {
-                    ForEach(servers, id: \.self) { server in
-                        Text(server)
+                        .foregroundColor(.red)
+                },
+                action: {
+                    if !viewModel.deleteDatabase(context: modelContext) {
+                        showUpdateError = true
                     }
-                }
-                
-                if (serverSelected == "Custom") {
-                    HStack {
-                        Text(String(localized: "settings_api_custom"))
-                        TextField("api.tosdr.org", text: $customServer)
-                            .textFieldStyle(.roundedBorder)
-                            .disableAutocorrection(true)
-                            .onChange(of: customServer, initial: false) { _, value in
-                                defaults.setValue(value, forKey: "serverUrl")
-                            }
+                },
+                isLast: true
+            )
+        }
+    }
+    
+    private var apiSection: some View {
+        GroupedListSection {
+            Text(String(localized: "settings_section_api"))
+        } content: {
+            GroupedListItem(
+                content: {
+                    Picker(String(localized: "settings_api_server"), selection: serverSelectionBinding) {
+                        ForEach(viewModel.servers, id: \.self) { server in
+                            Text(server).tag(server)
+                        }
                     }
-                }
-                
-            }.onChange(of: serverSelected, initial: false) { _, value in
-                customServer = ""
-                defaults.setValue(value, forKey: "server")
-                defaults.removeObject(forKey: "serverUrl")
+                    .pickerStyle(.menu)
+                },
+                isFirst: true,
+                isLast: viewModel.serverSelected != "Custom"
+            )
+            
+            if viewModel.serverSelected == "Custom" {
+                GroupedListItem(
+                    content: {
+                        HStack {
+                            Text(String(localized: "settings_api_custom"))
+                            TextField("api.tosdr.org", text: customServerBinding)
+                                .textFieldStyle(.roundedBorder)
+                                .disableAutocorrection(true)
+                        }
+                    },
+                    isLast: true
+                )
             }
-            #if os(iOS)
-            Section(String(localized: "settings_section_reset")) {
-                Button {
-                    defaults.setValue(true, forKey: "firstStart")
-                } label: {
+        }
+    }
+    
+    private var resetSection: some View {
+        GroupedListSection {
+            Text(String(localized: "settings_section_reset"))
+        } content: {
+            GroupedListButton(
+                content: {
                     Label(String(localized: "settings_reset_onboarding"), systemImage: "restart.circle")
-                }
-                    .contentShape(Rectangle())
-            }
-            #endif
-        }.navigationTitle(String(localized: "label_settings"))
+                },
+                action: {
+                    viewModel.resetOnboarding()
+                },
+                isFirst: true,
+                isLast: true
+            )
+        }
+    }
+    
+    private var serverSearchBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.serverSearch },
+            set: { viewModel.updateServerSearch($0) }
+        )
+    }
+    
+    private var serverSelectionBinding: Binding<String> {
+        Binding(
+            get: { viewModel.serverSelected },
+            set: { newValue in viewModel.updateServerSelection(newValue) }
+        )
+    }
+    
+    private var customServerBinding: Binding<String> {
+        Binding(
+            get: { viewModel.customServer },
+            set: { newValue in viewModel.updateCustomServer(newValue) }
+        )
     }
 }
 
