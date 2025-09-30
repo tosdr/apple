@@ -67,7 +67,7 @@ struct ServiceResponse: Codable {
         let status: String?
         let analysis: String?
         let case_info: Case?
-        let document_id: Int
+        let document_id: Int?
         let updated_at: String
         let created_at: String
         
