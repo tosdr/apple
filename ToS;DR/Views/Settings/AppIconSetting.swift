@@ -86,7 +86,7 @@ struct AppIconSetting: View {
                             .padding()
                             .background(selectedIcon == appliedIcon ? Color.secondary : Color.accentColor)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .cornerRadius(20)
                     }
                     .disabled(selectedIcon == appliedIcon)
                     .padding()

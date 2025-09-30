@@ -117,6 +117,9 @@ struct SettingsView: View {
                             Label(String(localized: "settings_db_refreshing"), systemImage: "arrow.clockwise")
                             Spacer()
                             ProgressView()
+#if os(macOS)
+                                .frame(width: 16, height: 16)
+#endif
                         }
                     } else {
                         Label(String(localized: "settings_db_refresh"), systemImage: "arrow.down.doc")
