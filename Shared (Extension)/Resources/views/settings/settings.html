@@ -1,1 +1,182 @@
-<!doctype html><html lang=en><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=style/settings.css><h2>Main Settings</h2><h4>Appearance Settings</h4><div class=group><div class=setting><div class=maincontent><div class=title><img src=icons/theme.svg><p>Theme Header w/ Logo</div></div><label class=switch><input id=theme type=checkbox><div class=switchinternal><a style=display:none>...</a></div></label></div><hr><div class=setting><div class=maincontent><div class=title><img src=icons/theme.svg><p>Theme Header w/ Rating</div></div><label class=switch><input id=themeRating type=checkbox><div class=switchinternal><a style=display:none>...</a></div></label></div><hr><div class=setting><div class=maincontent><div class=title><img src=icons/edit.svg><p>Curator Mode</div></div><label class=switch><input id=curatorMode type=checkbox><div class=switchinternal><a style=display:none>...</a></div></label></div></div><h4>Database Settings</h4><div class=group><div class="setting dbavailable"><div class=maincontent><div class=title><img src=icons/update.svg><p>Database Update Interval - <a id=days>7</a> Days</div><p class=caption>Determines how often the local database should update.<div class=title><input type=range min=1 max=14 value=7 class=slider id=update></div></div></div><hr class=dbavailable><div class=setting><div class=maincontent><div class=title><img src=icons/calendar.svg><p>Database Date</div><p class=caption>The date the Database was last compiled at.</div><p id=date>...</div><hr class=dbavailable><div class="setting dbavailable"><div class=maincontent><div class=title><img src=icons/database.svg><p>Services Indexed</div><p class=caption>The number of services that are indexed in the database and available offline.</div><p id=indexed>...</div></div><h4>Advanced Debugging Settings</h4><div class=group><div class=setting><div class=maincontent><div class=title><img src=icons/error.svg><p>Error Telemetry</div><p class=caption>Determines whether or not the Extension<br>should send error telemetry to the API.</div><label class=switch><input id=telemetry type=checkbox><div class=switchinternal><a style=display:none>...</a></div></label></div><hr><div class=setting><div class=maincontent><div class=title><img src=icons/update.svg><p>API Endpoint Override</div><p class=caption>Overrides the API the Extension uses. Please only enter the hostname.<div class=title><input value=api.tosdr.org id=api class=text></div></div></div></div><script src=../../scripts/views/settings.js></script>
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <script type="module" crossorigin src="/scripts/chunks/modulepreload-polyfill-B5Qt9EMX.js"></script>
+      <script type="module" crossorigin src="/scripts/chunks/chromeStorage-DcfQnkLV.js"></script>
+      <script type="module" crossorigin src="/scripts/chunks/language-CCyRCPEQ.js"></script>
+      <script type="module" crossorigin src="/scripts/views/settings.js"></script>
+      <link rel="stylesheet" crossorigin href="/views/style/settings-html.css">
+    </head>
+
+    <body>
+        <h2>Main Settings</h2>
+        <h4>Appearance Settings</h4>
+        <div class="group">
+            <div class="setting">
+                <div class="maincontent">
+                    <div class="title">
+                        <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20height='24'%20viewBox='0%20-960%20960%20960'%20width='24'%3e%3cpath%20d='M480-80q-82%200-155-31.5t-127.5-86Q143-252%20111.5-325T80-480q0-83%2032.5-156t88-127Q256-817%20330-848.5T488-880q80%200%20151%2027.5t124.5%2076q53.5%2048.5%2085%20115T880-518q0%20115-70%20176.5T640-280h-74q-9%200-12.5%205t-3.5%2011q0%2012%2015%2034.5t15%2051.5q0%2050-27.5%2074T480-80Zm0-400Zm-220%2040q26%200%2043-17t17-43q0-26-17-43t-43-17q-26%200-43%2017t-17%2043q0%2026%2017%2043t43%2017Zm120-160q26%200%2043-17t17-43q0-26-17-43t-43-17q-26%200-43%2017t-17%2043q0%2026%2017%2043t43%2017Zm200%200q26%200%2043-17t17-43q0-26-17-43t-43-17q-26%200-43%2017t-17%2043q0%2026%2017%2043t43%2017Zm120%20160q26%200%2043-17t17-43q0-26-17-43t-43-17q-26%200-43%2017t-17%2043q0%2026%2017%2043t43%2017ZM480-160q9%200%2014.5-5t5.5-13q0-14-15-33t-15-57q0-42%2029-67t71-25h70q66%200%20113-38.5T800-518q0-121-92.5-201.5T488-800q-136%200-232%2093t-96%20227q0%20133%2093.5%20226.5T480-160Z'/%3e%3c/svg%3e" />
+                        <p>Theme Header w/ Logo</p>
+                    </div>
+                </div>
+                <label class="switch">
+                    <input id="theme" type="checkbox" />
+                    <div class="switchinternal">
+                        <a style="display: none">...</a>
+                    </div>
+                </label>
+            </div>
+            <hr />
+            <div class="setting">
+                <div class="maincontent">
+                    <div class="title">
+                        <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20height='24'%20viewBox='0%20-960%20960%20960'%20width='24'%3e%3cpath%20d='M480-80q-82%200-155-31.5t-127.5-86Q143-252%20111.5-325T80-480q0-83%2032.5-156t88-127Q256-817%20330-848.5T488-880q80%200%20151%2027.5t124.5%2076q53.5%2048.5%2085%20115T880-518q0%20115-70%20176.5T640-280h-74q-9%200-12.5%205t-3.5%2011q0%2012%2015%2034.5t15%2051.5q0%2050-27.5%2074T480-80Zm0-400Zm-220%2040q26%200%2043-17t17-43q0-26-17-43t-43-17q-26%200-43%2017t-17%2043q0%2026%2017%2043t43%2017Zm120-160q26%200%2043-17t17-43q0-26-17-43t-43-17q-26%200-43%2017t-17%2043q0%2026%2017%2043t43%2017Zm200%200q26%200%2043-17t17-43q0-26-17-43t-43-17q-26%200-43%2017t-17%2043q0%2026%2017%2043t43%2017Zm120%20160q26%200%2043-17t17-43q0-26-17-43t-43-17q-26%200-43%2017t-17%2043q0%2026%2017%2043t43%2017ZM480-160q9%200%2014.5-5t5.5-13q0-14-15-33t-15-57q0-42%2029-67t71-25h70q66%200%20113-38.5T800-518q0-121-92.5-201.5T488-800q-136%200-232%2093t-96%20227q0%20133%2093.5%20226.5T480-160Z'/%3e%3c/svg%3e" />
+                        <p>Theme Header w/ Rating</p>
+                    </div>
+                </div>
+                <label class="switch">
+                    <input id="themeRating" type="checkbox" />
+                    <div class="switchinternal">
+                        <a style="display: none">...</a>
+                    </div>
+                </label>
+            </div>
+            <hr />
+            <div class="setting">
+                <div class="maincontent">
+                    <div class="title">
+                        <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20height='24'%20viewBox='0%20-960%20960%20960'%20width='24'%3e%3cpath%20d='M200-200h57l391-391-57-57-391%20391v57Zm-80%2080v-170l528-527q12-11%2026.5-17t30.5-6q16%200%2031%206t26%2018l55%2056q12%2011%2017.5%2026t5.5%2030q0%2016-5.5%2030.5T817-647L290-120H120Zm640-584-56-56%2056%2056Zm-141%2085-28-29%2057%2057-29-28Z'/%3e%3c/svg%3e" />
+                        <p>Curator Mode</p>
+                    </div>
+                </div>
+                <label class="switch">
+                    <input id="curatorMode" type="checkbox" />
+                    <div class="switchinternal">
+                        <a style="display: none">...</a>
+                    </div>
+                </label>
+            </div>
+            <hr />
+            <div class="setting">
+                <div class="maincontent">
+                    <div class="title">
+                        <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20height='24'%20viewBox='0%20-960%20960%20960'%20width='24'%3e%3cpath%20d='M480-120q-75%200-140.5-28.5t-114-77q-48.5-48.5-77-114T120-480q0-75%2028.5-140.5t77-114q48.5-48.5%20114-77T480-840q82%200%20155.5%2035T760-706v-54q0-17%2011.5-28.5T800-800q17%200%2028.5%2011.5T840-760v160q0%2017-11.5%2028.5T800-560H640q-17%200-28.5-11.5T600-600q0-17%2011.5-28.5T640-640h70q-41-56-101-88t-129-32q-117%200-198.5%2081.5T200-480q0%20117%2081.5%20198.5T480-200q95%200%20170-57t99-147q5-16%2018-24t29-6q17%202%2027%2014.5t6%2027.5q-29%20119-126%20195.5T480-120Zm40-376%20100%20100q11%2011%2011%2028t-11%2028q-11%2011-28%2011t-28-11L452-452q-6-6-9-13.5t-3-15.5v-159q0-17%2011.5-28.5T480-680q17%200%2028.5%2011.5T520-640v144Z'/%3e%3c/svg%3e" />
+                        <p>Language</p>
+                    </div>
+                    <p class="caption">
+                        Controls the language used for service details.
+                    </p>
+                    <div class="title">
+                        <select id="language" class="languageSelect">
+                            <option value="en">English</option>
+                            <option value="de">Deutsch</option>
+                            <option value="nl">Nederlands</option>
+                            <option value="fr">Français</option>
+                            <option value="es">Español</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h4>Database Settings</h4>
+        <div class="group">
+            <div class="setting dbavailable">
+                <div class="maincontent">
+                    <div class="title">
+                        <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20height='24'%20viewBox='0%20-960%20960%20960'%20width='24'%3e%3cpath%20d='M480-120q-75%200-140.5-28.5t-114-77q-48.5-48.5-77-114T120-480q0-75%2028.5-140.5t77-114q48.5-48.5%20114-77T480-840q82%200%20155.5%2035T760-706v-54q0-17%2011.5-28.5T800-800q17%200%2028.5%2011.5T840-760v160q0%2017-11.5%2028.5T800-560H640q-17%200-28.5-11.5T600-600q0-17%2011.5-28.5T640-640h70q-41-56-101-88t-129-32q-117%200-198.5%2081.5T200-480q0%20117%2081.5%20198.5T480-200q95%200%20170-57t99-147q5-16%2018-24t29-6q17%202%2027%2014.5t6%2027.5q-29%20119-126%20195.5T480-120Zm40-376%20100%20100q11%2011%2011%2028t-11%2028q-11%2011-28%2011t-28-11L452-452q-6-6-9-13.5t-3-15.5v-159q0-17%2011.5-28.5T480-680q17%200%2028.5%2011.5T520-640v144Z'/%3e%3c/svg%3e" />
+                        <p>
+                            Database Update Interval - <a id="days">7</a> Days
+                        </p>
+                    </div>
+                    <p class="caption">
+                        Determines how often the local database should update.
+                    </p>
+                    <div class="title">
+                        <input
+                            type="range"
+                            min="1"
+                            max="14"
+                            value="7"
+                            class="slider"
+                            id="update"
+                        />
+                    </div>
+                </div>
+            </div>
+            <hr class="dbavailable" />
+            <div class="setting">
+                <div class="maincontent">
+                    <div class="title">
+                        <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20height='24'%20viewBox='0%20-960%20960%20960'%20width='24'%3e%3cpath%20d='M200-80q-33%200-56.5-23.5T120-160v-560q0-33%2023.5-56.5T200-800h40v-40q0-17%2011.5-28.5T280-880q17%200%2028.5%2011.5T320-840v40h320v-40q0-17%2011.5-28.5T680-880q17%200%2028.5%2011.5T720-840v40h40q33%200%2056.5%2023.5T840-720v560q0%2033-23.5%2056.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0%200v-80%2080Zm280%20240q-17%200-28.5-11.5T440-440q0-17%2011.5-28.5T480-480q17%200%2028.5%2011.5T520-440q0%2017-11.5%2028.5T480-400Zm-160%200q-17%200-28.5-11.5T280-440q0-17%2011.5-28.5T320-480q17%200%2028.5%2011.5T360-440q0%2017-11.5%2028.5T320-400Zm320%200q-17%200-28.5-11.5T600-440q0-17%2011.5-28.5T640-480q17%200%2028.5%2011.5T680-440q0%2017-11.5%2028.5T640-400ZM480-240q-17%200-28.5-11.5T440-280q0-17%2011.5-28.5T480-320q17%200%2028.5%2011.5T520-280q0%2017-11.5%2028.5T480-240Zm-160%200q-17%200-28.5-11.5T280-280q0-17%2011.5-28.5T320-320q17%200%2028.5%2011.5T360-280q0%2017-11.5%2028.5T320-240Zm320%200q-17%200-28.5-11.5T600-280q0-17%2011.5-28.5T640-320q17%200%2028.5%2011.5T680-280q0%2017-11.5%2028.5T640-240Z'/%3e%3c/svg%3e" />
+                        <p>Database Date</p>
+                    </div>
+                    <p class="caption">
+                        The date the Database was last compiled at.
+                    </p>
+                </div>
+                <p id="date">...</p>
+            </div>
+            <hr class="dbavailable" />
+            <div class="setting dbavailable">
+                <div class="maincontent">
+                    <div class="title">
+                        <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20height='24'%20viewBox='0%20-960%20960%20960'%20width='24'%3e%3cpath%20d='M480-120q-151%200-255.5-46.5T120-280v-400q0-66%20105.5-113T480-840q149%200%20254.5%2047T840-680v400q0%2067-104.5%20113.5T480-120Zm0-479q89%200%20179-25.5T760-679q-11-29-100.5-55T480-760q-91%200-178.5%2025.5T200-679q14%2030%20101.5%2055T480-599Zm0%20199q42%200%2081-4t74.5-11.5q35.5-7.5%2067-18.5t57.5-25v-120q-26%2014-57.5%2025t-67%2018.5Q600-528%20561-524t-81%204q-42%200-82-4t-75.5-11.5Q287-543%20256-554t-56-25v120q25%2014%2056%2025t66.5%2018.5Q358-408%20398-404t82%204Zm0%20200q46%200%2093.5-7t87.5-18.5q40-11.5%2067-26t32-29.5v-98q-26%2014-57.5%2025t-67%2018.5Q600-328%20561-324t-81%204q-42%200-82-4t-75.5-11.5Q287-343%20256-354t-56-25v99q5%2015%2031.5%2029t66.5%2025.5q40%2011.5%2088%2018.5t94%207Z'/%3e%3c/svg%3e" />
+                        <p>Services Indexed</p>
+                    </div>
+                    <p class="caption">
+                        The number of services that are indexed in the database
+                        and available offline.
+                    </p>
+                </div>
+                <p id="indexed">...</p>
+            </div>
+        </div>
+
+        <h4>Advanced Debugging Settings</h4>
+        <div class="group">
+            <!-- <div class="setting">
+                <div class="maincontent">
+                    <div class="title">
+                        <img src="icons/error.svg" />
+                        <p>Error Telemetry</p>
+                    </div>
+                    <p class="caption">
+                        Determines whether or not the Extension<br>
+                        should send error telemetry to the API.
+                    </p>
+                </div>
+                <label class="switch">
+                    <input id="telemetry" type="checkbox" />
+                    <div class="switchinternal">
+                        <a style="display: none">...</a>
+                    </div>
+                </label>
+            </div>
+            <hr /> -->
+            <div class="setting">
+                <div class="maincontent">
+                    <div class="title">
+                        <img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20height='24'%20viewBox='0%20-960%20960%20960'%20width='24'%3e%3cpath%20d='M480-120q-75%200-140.5-28.5t-114-77q-48.5-48.5-77-114T120-480q0-75%2028.5-140.5t77-114q48.5-48.5%20114-77T480-840q82%200%20155.5%2035T760-706v-54q0-17%2011.5-28.5T800-800q17%200%2028.5%2011.5T840-760v160q0%2017-11.5%2028.5T800-560H640q-17%200-28.5-11.5T600-600q0-17%2011.5-28.5T640-640h70q-41-56-101-88t-129-32q-117%200-198.5%2081.5T200-480q0%20117%2081.5%20198.5T480-200q95%200%20170-57t99-147q5-16%2018-24t29-6q17%202%2027%2014.5t6%2027.5q-29%20119-126%20195.5T480-120Zm40-376%20100%20100q11%2011%2011%2028t-11%2028q-11%2011-28%2011t-28-11L452-452q-6-6-9-13.5t-3-15.5v-159q0-17%2011.5-28.5T480-680q17%200%2028.5%2011.5T520-640v144Z'/%3e%3c/svg%3e" />
+                        <p>
+                            API Endpoint Override
+                        </p>
+                    </div>
+                    <p class="caption">
+                        Overrides the API the Extension uses. Please only enter the hostname.
+                    </p>
+                    <div class="title">
+                        <input
+                            type="text"
+                            value="api.tosdr.org"
+                            id="api"
+                            class="text"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
