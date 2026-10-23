@@ -9,6 +9,11 @@
 import SwiftUI
 
 let innerPadding: CGFloat = 16
+#if os(macOS)
+let innerVerticalPadding: CGFloat = 10
+#else
+let innerVerticalPadding: CGFloat = 16
+#endif
 
 struct GroupedList<Content: View>: View {
     let content: Content
@@ -52,8 +57,13 @@ struct GroupedListSection<Header: View, Content: View>: View {
                 Spacer()
             }
             .padding(.horizontal, 8)
+            #if os(macOS)
+            .padding(.vertical, 4)
+            .padding(.top, 4)
+            #else
             .padding(.vertical, 8)
             .padding(.top, 8)
+            #endif
             
             // Content
             VStack(spacing: 0) {
@@ -108,7 +118,7 @@ struct GroupedListItem<Icon: View, Content: View, Trailing: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, innerPadding)
-        .padding(.vertical, innerPadding)
+        .padding(.vertical, innerVerticalPadding)
         .background(Color.platformSecondaryGroupedBackground)
         .overlay(
             Rectangle()
@@ -156,7 +166,7 @@ struct GroupedListToggle<Icon: View, Content: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, innerPadding)
-        .padding(.vertical, innerPadding)
+        .padding(.vertical, innerVerticalPadding)
         .background(Color.platformSecondaryGroupedBackground)
         .overlay(
             Rectangle()
@@ -206,7 +216,7 @@ struct GroupedListButton<Icon: View, Content: View>: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, innerPadding)
-            .padding(.vertical, innerPadding)
+            .padding(.vertical, innerVerticalPadding)
             .background(Color.platformSecondaryGroupedBackground)
             .overlay(
                 Rectangle()
@@ -259,7 +269,7 @@ struct GroupedListNavigationLink<Icon: View, Content: View, Destination: View>: 
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, innerPadding)
-            .padding(.vertical, innerPadding)
+            .padding(.vertical, innerVerticalPadding)
             .background(Color.platformSecondaryGroupedBackground)
             .overlay(
                 Rectangle()

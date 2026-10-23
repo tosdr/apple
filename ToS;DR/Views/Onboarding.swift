@@ -35,9 +35,9 @@ struct OnboardingView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(minWidth: 520, minHeight: 540)
                 #else
                 onboardingContent
-                    .padding(containerPadding)
                 #endif
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -48,12 +48,8 @@ struct OnboardingView: View {
 
     @ViewBuilder
     private var onboardingContent: some View {
+        #if os(macOS)
         VStack(spacing: 32) {
-            #if !os(macOS)
-            Spacer(minLength: 0)
-            #endif
-
-            #if os(macOS)
             if let page = currentPage {
                 OnboardingPageView(
                     model: page,
@@ -63,23 +59,25 @@ struct OnboardingView: View {
                 )
                 .transition(.opacity)
             }
-            #else
-            TabView(selection: $selectedPage) {
-                ForEach(pages) { page in
-                    OnboardingPageView(
-                        model: page,
-                        primaryAction: { handlePrimaryAction(for: page) },
-                        secondaryAction: { handleSecondaryAction(for: page) },
-                        showsActions: false
-                    )
-                    .tag(page.id)
-                }
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            #endif
 
             Spacer(minLength: 0)
         }
+        #else
+        // Each page scrolls on its own so tall pages (e.g. Safari with its notice)
+        // aren't clipped on short screens or with large Dynamic Type.
+        TabView(selection: $selectedPage) {
+            ForEach(pages) { page in
+                OnboardingPageView(
+                    model: page,
+                    primaryAction: { handlePrimaryAction(for: page) },
+                    secondaryAction: { handleSecondaryAction(for: page) },
+                    showsActions: false
+                )
+                .tag(page.id)
+            }
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        #endif
     }
 
     private var pages: [OnboardingPageView.Model] {
@@ -157,13 +155,11 @@ struct OnboardingView: View {
         #endif
     }
 
+    #if os(macOS)
     private var containerPadding: EdgeInsets {
-        #if os(macOS)
-        return EdgeInsets(top: 32, leading: 40, bottom: 32, trailing: 40)
-        #else
-        return EdgeInsets(top: 44, leading: 0, bottom: 34, trailing: 0)
-        #endif
+        EdgeInsets(top: 12, leading: 40, bottom: 12, trailing: 40)
     }
+    #endif
 
     private var bottomBarHorizontalPadding: CGFloat {
         #if os(macOS)
@@ -316,6 +312,20 @@ struct OnboardingPageView: View {
     var showsActions: Bool = true
 
     var body: some View {
+        #if os(macOS)
+        content
+        #else
+        GeometryReader { proxy in
+            ScrollView(.vertical, showsIndicators: false) {
+                content
+                    .frame(minHeight: proxy.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+        #endif
+    }
+
+    private var content: some View {
         VStack(spacing: 32) {
             #if !os(macOS)
             Spacer(minLength: 0)
@@ -384,9 +394,6 @@ struct OnboardingPageView: View {
         .padding(.vertical, 24)
         .frame(maxWidth: contentMaxWidth)
         .frame(maxWidth: .infinity)
-        #if !os(macOS)
-        .frame(maxHeight: .infinity)
-        #endif
     }
 
     @ViewBuilder
